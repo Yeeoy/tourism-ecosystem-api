@@ -16,18 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
-    path("admin", admin.site.urls),
-    path("", include("apps.accommodation_management.urls")),
-    path("accommodation_management/", include("apps.accommodation_management.urls")),
-    path("event_organizers/", include("apps.event_organizers.urls")),
-    path("local_attractions_museums/", include("apps.local_attractions_museums.urls")),
-    path("local_transportation_services/", include("apps.local_transportation_services.urls")),
-    path("outdoor_activity_centers/", include("apps.outdoor_activity_centers.urls")),
-    path("restaurants_cafes/", include("apps.restaurants_cafes.urls")),
-    path("retail_solutions/", include("apps.retail_solutions.urls")),
-    path("tour_event_services/", include("apps.tour_event_services.urls")),
-    path("visitor_info_center/", include("apps.visitor_info_center.urls")),
+    path('admin/', admin.site.urls),
+    path('api/schema/', SpectacularAPIView.as_view(),
+         name='api-schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='api-schema'),
+         name='api-docs'),
+    path('', SpectacularSwaggerView.as_view(url_name='api-schema'),
+         name='api-docs'),
+    path("api/user/", include("apps.user.urls")),
+    path("api/accom/", include("apps.accommodation_management.urls")),
+    path("events/", include("apps.event_organizers.urls")),
+    path("attractions/", include("apps.local_attractions_museums.urls")),
+    path("dining/", include("apps.restaurants_cafes.urls")),
+    path("tours/", include("apps.tour_event_services.urls")),
 
 ]

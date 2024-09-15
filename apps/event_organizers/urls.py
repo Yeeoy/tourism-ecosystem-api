@@ -1,8 +1,10 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-import apps.event_organizers.views
+router = DefaultRouter()
+
+app_name = 'event_organizers'
 
 urlpatterns = [
-    path("", apps.event_organizers.views.index),
-    path("hello", apps.event_organizers.views.hello_world),
+    path('', include(router.urls)),
 ]

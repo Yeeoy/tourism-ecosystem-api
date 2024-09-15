@@ -20,18 +20,29 @@ python manage.py makemigrations
 python manage.py migrate 
 ```
 
-## DataBase
+# Run the tests
 
-host: 192.9.160.69
-port: 3306
-user: tour_eco
-password: UOWCSCI927
+```bash
+# to run the tests
+python manage.py test 
+```
 
-## Usage
+# DataBase
 
-# Localhost:8000/admin
+**host:** 192.9.160.69 
 
+**port:** 3306
+
+**user:** tour_eco
+
+**password:** UOWCSCI927
+
+# Usage
+
+## Admin backend
 http://localhost:8000/admin
-superuser: admin
-password: uowadmin
 
+```
+superuser: admin@example.com
+password: uowadmin
+```

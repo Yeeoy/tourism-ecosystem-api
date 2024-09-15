@@ -1,8 +1,15 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-import apps.accommodation_management.views
+from .views import RoomViewSet, GuestViewSet, BookingViewSet
+
+router = DefaultRouter()
+router.register('rooms', RoomViewSet)
+router.register('guests', GuestViewSet)
+router.register('bookings', BookingViewSet)
+
+app_name = 'accommodation_management'
 
 urlpatterns = [
-    path("", apps.accommodation_management.views.index),
-    path("hello", apps.accommodation_management.views.hello_world),
+    path('', include(router.urls)),
 ]
