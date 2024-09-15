@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from models import (Attraction, Museum, Ticket,
-                    TourGuide, Booking, EducationContent)
+from .models import (Attraction, Museum, Ticket,
+                     TourGuide, Booking, EducationContent)
 
 
 class AttractionSerializer(serializers.ModelSerializer):

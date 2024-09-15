@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from models import (Museum, Ticket,
-                    TourGuide, Booking, EducationContent)
+from .models import (Museum, Ticket,
+                     TourGuide, Booking, EducationContent)
 
 
 # Register your models here.
