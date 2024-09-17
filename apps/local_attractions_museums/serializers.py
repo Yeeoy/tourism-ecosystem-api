@@ -15,6 +15,12 @@ class MuseumSerializer(serializers.ModelSerializer):
         model = Museum
         fields = '__all__'
 
+    def create(self, validated_data):
+        attractions_data = validated_data.pop('attractions', [])
+        museum = Museum.objects.create(**validated_data)
+        museum.attractions.set(attractions_data)
+        return museum
+
 
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:

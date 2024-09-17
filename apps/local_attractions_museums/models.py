@@ -23,7 +23,8 @@ class Museum(models.Model):
     closing_hours = models.CharField(max_length=50)
     is_open = models.BooleanField(default=True)
     ticket_price = models.DecimalField(max_digits=10, decimal_places=2)
-    attractions = models.ManyToManyField(Attraction, related_name='museums')
+    attractions = models.ManyToManyField(Attraction,
+                                         related_name='museums', blank=True)
 
     def __str__(self):
         return self.name

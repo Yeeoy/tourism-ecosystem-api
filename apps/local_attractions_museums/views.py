@@ -1,9 +1,8 @@
 from rest_framework import viewsets
-from rest_framework.permissions import (IsAuthenticatedOrReadOnly,
-                                        IsAuthenticated,
+from rest_framework.permissions import (IsAuthenticated,
                                         AllowAny, IsAdminUser)
 
-from tourism_ecosystem.Permissions import IsOwnerOrAdmin
+from tourism_ecosystem.permissions import IsOwnerOrAdmin, IsAdminOrReadOnly
 from .models import (Attraction, Museum, Ticket,
                      TourGuide, Booking, EducationContent)
 from .serializers import (
@@ -16,14 +15,14 @@ from .serializers import (
 class AttractionViewSet(viewsets.ModelViewSet):
     queryset = Attraction.objects.all()
     serializer_class = AttractionSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]  # 未登录用户只能查看，管理员可管理
+    permission_classes = [IsAdminOrReadOnly]  # 未登录用户只能查看，管理员可管理
 
 
 # 博物馆视图集
 class MuseumViewSet(viewsets.ModelViewSet):
     queryset = Museum.objects.all()
     serializer_class = MuseumSerializer
-    permission_classes = [IsAuthenticated]  # 只有已登录用户才能查看，管理员有完全权限
+    permission_classes = [IsAdminOrReadOnly]  # 只有已登录用户才能查看，管理员有完全权限
 
 
 # 门票视图集

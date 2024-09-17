@@ -10,7 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-import os, sys
+import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,7 +47,6 @@ INSTALLED_APPS = [
     "apps.local_attractions_museums",
     "apps.restaurants_cafes",
     "apps.tour_event_services",
-
 ]
 
 MIDDLEWARE = [
@@ -158,6 +158,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    # Custom exception handler and renderer
+    'EXCEPTION_HANDLER': 'tourism_ecosystem.responses.custom_exception_handler',
+    # Custom renderer
+    'DEFAULT_RENDERER_CLASSES': (
+        'tourism_ecosystem.responses.CustomRenderer',
+    )
 }
 
 # Spectacular settings
@@ -173,7 +179,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:8000",
+    "http://192.9.160.69",
+    "http://192.9.160.69:8000"
 ]
+
+# 受信任的 CSRF 来源
+CSRF_TRUSTED_ORIGINS = ['http://192.9.160.69', 'http://192.9.160.69:8000']
 
 # Logging Configuration
 LOGGING = {

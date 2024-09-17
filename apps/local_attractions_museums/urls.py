@@ -13,11 +13,12 @@ router = DefaultRouter()
 router.register('attractions', AttractionViewSet)
 router.register('museums', MuseumViewSet)
 router.register('tickets', TicketViewSet)
-router.register('tour-guides', TourGuideViewSet)
+router.register('tour-guides', TourGuideViewSet, basename='tour-guides')
 router.register('bookings', BookingViewSet)
-router.register('education-contents', EducationContentViewSet)
+router.register('education-contents', EducationContentViewSet,
+                basename='education-contents')
 
 # 连接路由到URLs
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]
