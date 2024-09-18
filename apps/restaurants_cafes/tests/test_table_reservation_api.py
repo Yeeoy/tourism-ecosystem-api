@@ -113,7 +113,7 @@ class PrivateTableReservationApiTests(TestCase):
 
         url = detail_url(table_reservation.id)
         res = self.client.patch(url, payload)
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
         res = self.client.patch(detail_url(table_reservation2.id), payload)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
