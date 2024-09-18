@@ -19,28 +19,32 @@ class Event(models.Model):
 
 
 class VenueBooking(models.Model):
-    event = models.ForeignKey('Event', on_delete=models.CASCADE)
+    event_id = models.ForeignKey('Event', on_delete=models.CASCADE)
+    promotion_id = models.ForeignKey('EventPromotion', null=True, blank=True, on_delete=models.SET_NULL)
+    user_id = models.ForeignKey('customUser.User', on_delete=models.CASCADE)
     booking_date = models.DateTimeField()
     booking_status = models.BooleanField(default=False)
     number_of_tickets = models.PositiveIntegerField()
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    promotion = models.ForeignKey('EventPromotion', null=True, blank=True, on_delete=models.SET_NULL)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
-        return f"Booking for {self.event.name}"
+        return f"Booking for {self.event_id.name}"
 
     def calculate_total_amount(self):
         # 确保 event 和 entry_fee 存在
-        if not self.event or not self.event.entry_fee:
+        if not self.event_id or not self.event_id.entry_fee:
             raise ValueError("Event and its entry fee are required to calculate the total amount.")
 
         # 使用 Decimal 进行金额计算
-        ticket_price = Decimal(self.event.entry_fee)
+        ticket_price = Decimal(self.event_id.entry_fee)
         base_amount = ticket_price * self.number_of_tickets
+        self.discount_amount = 0
 
         # 如果有促销，应用折扣
-        if self.promotion:
-            discount_amount = base_amount * (Decimal(self.promotion.discount) / Decimal(100))
+        if self.promotion_id:
+            discount_amount = base_amount * (1 - Decimal(self.promotion_id.discount))
+            self.discount_amount = discount_amount
             return base_amount - discount_amount
 
         # 没有促销时返回原始金额

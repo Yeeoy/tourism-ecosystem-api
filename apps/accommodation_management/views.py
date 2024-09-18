@@ -1,48 +1,94 @@
-# Create your views here.
-
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Room, Guest, Booking
-from .serializers import RoomSerializer, GuestSerializer, BookingSerializer
+from apps.accommodation_management.models import Accommodation, RoomType, RoomBooking, GuestService, FeedbackReview
+from apps.accommodation_management.serializers import AccommodationSerializer, RoomTypeSerializer, \
+    RoomBookingSerializer, AccommodationCalculatePriceSerializer, GuestServiceSerializer, FeedbackReviewSerializer
+from tourism_ecosystem.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
 
 
-class RoomViewSet(viewsets.ModelViewSet):
-    queryset = Room.objects.all()
-    serializer_class = RoomSerializer
+@extend_schema(tags=['AM - Accommodation'])
+class AccommodationViewSet(viewsets.ModelViewSet):
+    queryset = Accommodation.objects.all()
+    serializer_class = AccommodationSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
-class GuestViewSet(viewsets.ModelViewSet):
-    queryset = Guest.objects.all()
-    serializer_class = GuestSerializer
+@extend_schema(tags=['AM - Room Type'])
+class RoomTypeViewSet(viewsets.ModelViewSet):
+    queryset = RoomType.objects.all()
+    serializer_class = RoomTypeSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
-class BookingViewSet(viewsets.ModelViewSet):
-    queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
+@extend_schema(tags=['AM - Room Booking'])
+class RoomBookingViewSet(viewsets.ModelViewSet):
+    queryset = RoomBooking.objects.all()
+    serializer_class = RoomBookingSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
-    def create(self, request, *args, **kwargs):
+    def perform_create(self, serializer):
+        # 自动将当前登录用户设置为 user_id
+        serializer.save(user_id=self.request.user)
+
+
+    def get_queryset(self):
+        user = self.request.user
+        # 如果是管理员用户，返回所有订单
+        if user.is_staff or user.is_superuser:
+            return RoomBooking.objects.all()
+        # 如果是普通用户，只返回与当前用户相关的订单
+        return RoomBooking.objects.filter(user_id=user)
+
+    @action(detail=False,
+            methods=['post'],
+            url_path='calculate-price',
+            permission_classes=[IsAuthenticated],
+            serializer_class=AccommodationCalculatePriceSerializer)
+    def calculate_price(self, request, *args, **kwargs):
+        """
+        计算并返回总金额，只需要房间和天数作为参数
+        """
+        # 使用自定义的序列化器进行数据验证
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # 检查预订冲突
-        room_id = request.data.get('room', {}).get('id')
-        check_in = request.data.get('check_in')
-        check_out = request.data.get('check_out')
+        # 从序列化器中获取经过验证的参数
+        room_id = serializer.validated_data.get('room_id')
+        number_of_days = serializer.validated_data.get('number_of_days')
 
-        if Booking.objects.filter(
-                room_id=room_id,
-                check_in__lt=check_out,
-                check_out__gt=check_in
-        ).exists():
-            return Response({
-                "error": "Booking conflict detected. "
-                         "The room is already booked for the selected dates."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        # 获取房间对象
+        accommodation = Accommodation.objects.get(id=room_id)
+        room = RoomType.objects.get(id=room_id)
 
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data,
-                        status=status.HTTP_201_CREATED,
-                        headers=headers)
+        # 计算总金额
+        total_price = room.price_per_night * number_of_days
+
+        return Response(
+            {
+                'accommodation': accommodation.name,
+                'room_type': room.room_type,
+                'price_per_night': room.price_per_night,
+                'number_of_days': number_of_days,
+                'total_price': total_price
+            }, status=status.HTTP_200_OK
+        )
+
+@extend_schema(tags=['AM - Guest Service'])
+class GuestServiceViewSet(viewsets.ModelViewSet):
+    queryset = GuestService.objects.all()
+    serializer_class = GuestServiceSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+@extend_schema(tags=['AM - Feedback Review'])
+class FeedbackReviewViewSet(viewsets.ModelViewSet):
+    queryset = FeedbackReview.objects.all()
+    serializer_class = FeedbackReviewSerializer
+    permission_classes = [IsOwnerOrAdmin]
+
+    def perform_create(self, serializer):
+        # 自动将当前登录用户设置为 user
+        serializer.save(user=self.request.user)

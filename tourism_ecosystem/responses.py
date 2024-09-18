@@ -46,8 +46,7 @@ class CustomRenderer(JSONRenderer):
     def render(self, data, accepted_media_type=None, renderer_context=None):
         # 检查数据是否已经是自定义格式
         if isinstance(data, dict) and 'code' in data and 'msg' in data:
-            return (super(CustomRenderer, self)
-                    .render(data, accepted_media_type, renderer_context))
+            return super(CustomRenderer, self).render(data, accepted_media_type, renderer_context)
 
         # 如果是错误响应，保持现状（异常处理器已经处理）
         response = renderer_context['response']
@@ -61,7 +60,7 @@ class CustomRenderer(JSONRenderer):
             'data': data
         }
 
-        return super(CustomRenderer, self.render(response_data, accepted_media_type, renderer_context))
+        return super(CustomRenderer, self).render(response_data, accepted_media_type, renderer_context)
 
 
 def custom_exception_handler(exc, context):
@@ -69,9 +68,11 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if response is not None:
+        # print(f"Error detail: {response.data}")  # 打印详细的错误信息
         # 提取错误信息，构建自定义响应
         code = response.status_code
-        msg = response.data.get('detail', 'request error')
+        # msg = response.data.get('detail', 'request error')
+        msg = response.data
         return CustomResponse.error(msg=msg, code=code)
     else:
         return response

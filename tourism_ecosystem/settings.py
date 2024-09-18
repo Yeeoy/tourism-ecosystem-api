@@ -41,12 +41,13 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     'drf_spectacular',
     "corsheaders",
-    "apps.user",
+    "apps.customUser",
     "apps.accommodation_management",
     "apps.event_organizers",
-    "apps.local_attractions_museums",
     "apps.restaurants_cafes",
     "apps.tour_event_services",
+    "apps.local_transportation_services",
+    "apps.tourism_information_center"
 ]
 
 MIDDLEWARE = [
@@ -144,8 +145,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # 媒体文件存储路径
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Custom user model
-AUTH_USER_MODEL = "user.User"
+# Custom customUser model
+AUTH_USER_MODEL = "customUser.User"
 
 # Django REST framework settings
 REST_FRAMEWORK = {

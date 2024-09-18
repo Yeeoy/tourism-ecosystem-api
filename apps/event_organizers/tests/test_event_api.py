@@ -103,7 +103,7 @@ class PrivateEventsAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-        # change to admin user
+        # change to admin customUser
         self.user.is_staff = True
         res = self.client.post(EVENTS_URL, payload)
 
@@ -152,7 +152,7 @@ class PrivateEventsAPITests(TestCase):
         res = self.client.patch(detail_url(event.id), payload)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-        # change to admin user
+        # change to admin customUser
         self.user.is_staff = True
         res = self.client.patch(detail_url(event.id), payload)
 
@@ -193,7 +193,7 @@ class PrivateEventsAPITests(TestCase):
         res = self.client.patch(detail_url(event.id), payload)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-        # change to admin user
+        # change to admin customUser
         self.user.is_staff = True
         res = self.client.patch(detail_url(event.id), payload)
 
@@ -216,7 +216,7 @@ class PrivateEventsAPITests(TestCase):
         res = self.client.delete(detail_url(event.id))
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-        # change to admin user
+        # change to admin customUser
         self.user.is_staff = True
         res = self.client.delete(detail_url(event.id))
 

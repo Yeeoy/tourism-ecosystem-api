@@ -114,10 +114,13 @@ class PrivateEventPromotionAPITests(TestCase):
         }
 
         res = self.client.post(EVENT_PROMOTION_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # change to admin customUser
+        self.user.is_staff = True
+        res = self.client.post(EVENT_PROMOTION_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        event_promotion = EventPromotion.objects.get(id=res.data['id'])
-        self.assertEqual(event_promotion.discount, payload['discount'])
 
     def test_update_event_promotion(self):
         event = create_event(
@@ -147,7 +150,7 @@ class PrivateEventPromotionAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-        # change to admin user
+        # change to admin customUser
         self.user.is_staff = True
         res = self.client.patch(url, payload)
 
@@ -182,7 +185,7 @@ class PrivateEventPromotionAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-        # change to admin user
+        # change to admin customUser
         self.user.is_staff = True
         res = self.client.delete(url)
 

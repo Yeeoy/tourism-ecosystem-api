@@ -16,9 +16,9 @@ class EventAdmin(admin.ModelAdmin):
 # 注册 VenueBooking 模型
 @admin.register(VenueBooking)
 class VenueBookingAdmin(admin.ModelAdmin):
-    list_display = ('event', 'booking_date', 'number_of_tickets', 'total_amount', 'booking_status', 'promotion')
-    search_fields = ('event__name',)
-    list_filter = ('booking_status', 'event__event_date', 'promotion')
+    list_display = ('event_id', 'booking_date', 'number_of_tickets', 'total_amount', 'booking_status', 'promotion_id')
+    search_fields = ('event_id__name', 'event_id__venue')
+    list_filter = ('booking_status', 'event_id__event_date', 'promotion_id')
     ordering = ('-booking_date',)
     date_hierarchy = 'booking_date'
 

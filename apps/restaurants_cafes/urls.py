@@ -1,8 +1,13 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-import apps.restaurants_cafes.views
+from apps.restaurants_cafes.views import RestaurantViewSet, TableReservationViewSet, MenuViewSet, OnlineOrderViewSet
 
-urlpatterns = [
-    path("", apps.restaurants_cafes.views.hello_world),
-    path("hello", apps.restaurants_cafes.views.hello_world),
-]
+app_name = 'restaurants_cafes'
+
+router = DefaultRouter()
+router.register('restaurant', RestaurantViewSet, basename='restaurant')
+router.register('table-reservations', TableReservationViewSet)
+router.register('menus', MenuViewSet)
+router.register('online-orders', OnlineOrderViewSet)
+
+urlpatterns = router.urls

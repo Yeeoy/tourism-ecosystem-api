@@ -1,8 +1,8 @@
 from django.urls import path
 
-from apps.user import views
+from apps.customUser import views
 
-app_name = 'user'
+app_name = 'customUser'
 
 urlpatterns = [
     path('create/', views.CreateUserView.as_view(), name='create'),

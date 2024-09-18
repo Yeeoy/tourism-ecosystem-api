@@ -19,23 +19,24 @@ class VenueBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = VenueBooking
         fields = '__all__'
-        read_only_fields = ['id', 'total_amount']
+        read_only_fields = ['id', 'total_amount', 'discount_amount','user_id']
 
     def get_total_amount(self, obj):
         return obj.calculate_total_amount()
 
 
+
 class EventPromotionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventPromotion
-        fields = ('event', 'promotion_start_date', 'promotion_end_date', 'discount')
+        fields = ('id', 'event', 'promotion_start_date', 'promotion_end_date', 'discount')
         read_only_fields = ['id', ]
 
     def validate_discount(self, value):
         return Decimal(str(value))
 
 
-class CalculatePriceSerializer(serializers.Serializer):
+class EventBookingCalculatePriceSerializer(serializers.Serializer):
     event = serializers.IntegerField(required=True)
     number_of_tickets = serializers.IntegerField(required=True)
 

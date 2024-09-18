@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated)
@@ -10,24 +11,42 @@ from tourism_ecosystem.permissions import IsAdminOrReadOnly
 from tourism_ecosystem.responses import CustomResponse
 from .models import (Event, VenueBooking, EventPromotion)
 from .serializers import (EventSerializer, VenueBookingSerializer,
-                          EventPromotionSerializer, CalculatePriceSerializer)
+                          EventPromotionSerializer, EventBookingCalculatePriceSerializer)
 
 
+@extend_schema(tags=['EO - Event'])
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsAdminOrReadOnly]  # 只有管理员可以访问
 
 
+@extend_schema(tags=['EO - Venue Booking'])
 class VenueBookingViewSet(viewsets.ModelViewSet):
     queryset = VenueBooking.objects.all()
     serializer_class = VenueBookingSerializer
+    permission_classes = [IsAuthenticated]  # 只有认证用户可以访问
+
+    def perform_create(self, serializer):
+        # 自动将当前登录用户设置为 user_id
+        print(self.request.user)
+        serializer.save(user_id=self.request.user)
+
+        # 重写 get_queryset 方法，根据权限过滤订单
+
+    def get_queryset(self):
+        user = self.request.user
+        # 如果是管理员用户，返回所有订单
+        if user.is_staff or user.is_superuser:
+            return VenueBooking.objects.all()
+        # 如果是普通用户，只返回与当前用户相关的订单
+        return VenueBooking.objects.filter(user_id=user)
 
     @action(detail=False,
             methods=['post'],
             url_path='calculate-price',
             permission_classes=[IsAuthenticated],
-            serializer_class=CalculatePriceSerializer)
+            serializer_class=EventBookingCalculatePriceSerializer)
     def calculate_price(self, request, *args, **kwargs):
         """
         计算并返回总金额，只需要事件和票数作为参数
@@ -91,6 +110,7 @@ class VenueBookingViewSet(viewsets.ModelViewSet):
             )
 
 
+@extend_schema(tags=['EO - Event Promotion'])
 class EventPromotionViewSet(viewsets.ModelViewSet):
     queryset = EventPromotion.objects.all()
     serializer_class = EventPromotionSerializer

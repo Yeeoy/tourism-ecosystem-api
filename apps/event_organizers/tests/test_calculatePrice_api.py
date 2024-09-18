@@ -54,12 +54,13 @@ class CalculatePriceAPITests(TestCase):
 
     def test_calculate_price_with_promotion(self):
         """测试有促销活动时的总金额计算"""
+        discount = Decimal('0.80')
         # 创建促销活动，折扣为 20%
         EventPromotion.objects.create(
             event=self.event,
             promotion_start_date=timezone.now().date(),
             promotion_end_date=timezone.now().date() + timedelta(days=10),
-            discount=20  # 20% 折扣
+            discount=discount
         )
 
         payload = {
@@ -72,7 +73,8 @@ class CalculatePriceAPITests(TestCase):
         # 确保使用 Decimal 类型计算金额
         base_amount = Decimal(self.event.entry_fee) * Decimal(2)
         # 折扣后价格 (100 * 0.80 = 80)
-        expected_total = base_amount * Decimal('0.80')
+        expected_total = base_amount * Decimal(discount)
+
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(Decimal(res.data['total_amount']), expected_total)
@@ -94,7 +96,7 @@ def test_calculate_price_with_invalid_event(self):
 def test_calculate_price_with_invalid_tickets(self):
     """测试无效票数（负数）的处理"""
     payload = {
-        'event': self.event.id,
+        'event': self.event_id.id,
         'number_of_tickets': -5  # 无效的票数
     }
 
