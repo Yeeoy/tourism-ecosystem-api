@@ -11,7 +11,7 @@ router.register('room-booking', RoomBookingViewSet, basename='room-booking')
 router.register('guest-service', GuestServiceViewSet, basename='guest-service')
 router.register('feedback-review', FeedbackReviewViewSet, basename='feedback-review')
 
-app_name = 'accommodation_management'
+app_name = 'accommodation'
 
 urlpatterns = [
     path('', include(router.urls)),

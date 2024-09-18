@@ -4,9 +4,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from apps.accommodation_management.models import FeedbackReview, Accommodation
+from apps.accommodation.models import FeedbackReview, Accommodation
 
-FEED_BACK_REVIEW_API_URL = reverse('accommodation_management:feedback-review-list')
+FEED_BACK_REVIEW_API_URL = reverse('accommodation:feedback-review-list')
 
 
 def create_feed_back_review(**params):
@@ -18,7 +18,7 @@ def create_user(email='user@example.com', password='password123'):
 
 
 def detail_url(feed_back_review_id):
-    return reverse('accommodation_management:feedback-review-detail', args=[feed_back_review_id])
+    return reverse('accommodation:feedback-review-detail', args=[feed_back_review_id])
 
 
 class PublicFeedBackReviewAPITests(TestCase):
@@ -113,7 +113,6 @@ class PrivateFeedBackReviewAPITests(TestCase):
         self.assertEqual(res.data['date'], payload['date'])
 
     def test_update_feed_back_review(self):
-
         user2 = create_user(
             email='user2@example.com',
             password='password123'
@@ -134,7 +133,6 @@ class PrivateFeedBackReviewAPITests(TestCase):
             review='Test review2',
             date='2021-09-02'
         )
-
 
         payload = {
             'rating': 4,

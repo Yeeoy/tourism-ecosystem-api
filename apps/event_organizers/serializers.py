@@ -19,11 +19,10 @@ class VenueBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = VenueBooking
         fields = '__all__'
-        read_only_fields = ['id', 'total_amount', 'discount_amount','user_id']
+        read_only_fields = ['id', 'total_amount', 'discount_amount', 'user_id']
 
     def get_total_amount(self, obj):
         return obj.calculate_total_amount()
-
 
 
 class EventPromotionSerializer(serializers.ModelSerializer):

@@ -11,16 +11,18 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
 
+
 class TableReservation(models.Model):
     restaurant = models.ForeignKey('Restaurant', on_delete=models.CASCADE)
     user = models.ForeignKey('customUser.User', on_delete=models.CASCADE)
     reservation_date = models.DateField()
     reservation_time = models.TimeField()
     number_of_guests = models.PositiveIntegerField()
-    reservation_status = models.BooleanField(default=False)
+    reservation_status = models.CharField(max_length=255)
 
     def __str__(self):
         return self.restaurant.name
+
 
 class Menu(models.Model):
     restaurant = models.ForeignKey('Restaurant', on_delete=models.CASCADE)
@@ -30,6 +32,7 @@ class Menu(models.Model):
 
     def __str__(self):
         return self.item_name
+
 
 class OnlineOrder(models.Model):
     user = models.ForeignKey('customUser.User', on_delete=models.CASCADE)

@@ -4,8 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.accommodation_management.models import Accommodation, RoomType, RoomBooking, GuestService, FeedbackReview
-from apps.accommodation_management.serializers import AccommodationSerializer, RoomTypeSerializer, \
+from apps.accommodation.models import Accommodation, RoomType, RoomBooking, GuestService, FeedbackReview
+from apps.accommodation.serializers import AccommodationSerializer, RoomTypeSerializer, \
     RoomBookingSerializer, AccommodationCalculatePriceSerializer, GuestServiceSerializer, FeedbackReviewSerializer
 from tourism_ecosystem.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
 
@@ -33,7 +33,6 @@ class RoomBookingViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # 自动将当前登录用户设置为 user_id
         serializer.save(user_id=self.request.user)
-
 
     def get_queryset(self):
         user = self.request.user
@@ -77,11 +76,13 @@ class RoomBookingViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_200_OK
         )
 
+
 @extend_schema(tags=['AM - Guest Service'])
 class GuestServiceViewSet(viewsets.ModelViewSet):
     queryset = GuestService.objects.all()
     serializer_class = GuestServiceSerializer
     permission_classes = [IsAdminOrReadOnly]
+
 
 @extend_schema(tags=['AM - Feedback Review'])
 class FeedbackReviewViewSet(viewsets.ModelViewSet):

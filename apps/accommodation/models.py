@@ -1,9 +1,7 @@
 from datetime import datetime
 
-from django.contrib.auth import models
-from decimal import Decimal
-
 from django.db import models
+
 
 class Accommodation(models.Model):
     name = models.CharField(max_length=255)
@@ -19,6 +17,7 @@ class Accommodation(models.Model):
     def __str__(self):
         return self.name
 
+
 class RoomType(models.Model):
     accommodation_id = models.ForeignKey('Accommodation', on_delete=models.CASCADE)
     room_type = models.CharField(max_length=255)
@@ -28,6 +27,7 @@ class RoomType(models.Model):
 
     def __str__(self):
         return self.room_type
+
 
 class RoomBooking(models.Model):
     room_type_id = models.ForeignKey('RoomType', on_delete=models.CASCADE)
@@ -60,10 +60,10 @@ class GuestService(models.Model):
     def __str__(self):
         return self.service_name
 
+
 class FeedbackReview(models.Model):
     accommodation_id = models.ForeignKey('Accommodation', on_delete=models.CASCADE)
     user = models.ForeignKey('customUser.User', on_delete=models.CASCADE)
     rating = models.PositiveIntegerField()
     review = models.TextField()
     date = models.DateField()
-

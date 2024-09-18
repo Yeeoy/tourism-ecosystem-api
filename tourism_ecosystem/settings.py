@@ -42,10 +42,9 @@ INSTALLED_APPS = [
     'drf_spectacular',
     "corsheaders",
     "apps.customUser",
-    "apps.accommodation_management",
+    "apps.accommodation",
     "apps.event_organizers",
     "apps.restaurants_cafes",
-    "apps.tour_event_services",
     "apps.local_transportation_services",
     "apps.tourism_information_center"
 ]

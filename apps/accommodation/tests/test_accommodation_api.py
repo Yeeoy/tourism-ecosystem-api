@@ -4,22 +4,25 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from apps.accommodation_management.models import Accommodation
+from apps.accommodation.models import Accommodation
 
+ACCOMMODATION_URL = reverse('accommodation:accommodation-list')
 
-ACCOMMODATION_URL = reverse('accommodation_management:accommodation-list')
 
 def create_accommodation(**params):
     return Accommodation.objects.create(**params)
 
+
 def create_user(**params):
     return get_user_model().objects.create_user(**params)
 
+
 def detail_url(accommodation_id):
     return reverse(
-        'accommodation_management:accommodation-detail',
+        'accommodation:accommodation-detail',
         args=[accommodation_id]
     )
+
 
 class PublicAccommodationAPITests(TestCase):
     def setUp(self):
@@ -27,27 +30,27 @@ class PublicAccommodationAPITests(TestCase):
 
     def test_retrieve_accommodations(self):
         create_accommodation(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
         create_accommodation(
-            name = 'Test Accommodation 2',
-            location = 'Test Location 2',
-            star_rating = 3,
-            total_rooms = 200,
-            amenities = 'Test amenities 2',
-            type = 'Test type 2',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info 2'
+            name='Test Accommodation 2',
+            location='Test Location 2',
+            star_rating=3,
+            total_rooms=200,
+            amenities='Test amenities 2',
+            type='Test type 2',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info 2'
         )
 
         res = self.client.get(ACCOMMODATION_URL)
@@ -60,15 +63,15 @@ class PublicAccommodationAPITests(TestCase):
 
     def test_retrieve_accommodation_detail(self):
         accommodation = create_accommodation(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
         res = self.client.get(detail_url(accommodation.id))
@@ -83,6 +86,7 @@ class PublicAccommodationAPITests(TestCase):
         self.assertEqual(res.data['check_in_time'], accommodation.check_in_time)
         self.assertEqual(res.data['check_out_time'], accommodation.check_out_time)
         self.assertEqual(res.data['contact_info'], accommodation.contact_info)
+
 
 class PrivateAccommodationAPITests(TestCase):
     def setUp(self):
@@ -119,15 +123,15 @@ class PrivateAccommodationAPITests(TestCase):
 
     def test_update_accommodation(self):
         accommodation = create_accommodation(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
         payload = {
@@ -164,15 +168,15 @@ class PrivateAccommodationAPITests(TestCase):
 
     def test_delete_accommodation(self):
         accommodation = create_accommodation(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
         res = self.client.delete(detail_url(accommodation.id))

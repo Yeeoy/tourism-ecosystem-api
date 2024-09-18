@@ -1,8 +1,7 @@
-from decimal import Decimal
-
 from rest_framework import serializers
 
 from .models import (Accommodation, RoomType, RoomBooking, GuestService, FeedbackReview)
+
 
 class AccommodationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,11 +9,13 @@ class AccommodationSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', ]
 
+
 class RoomTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoomType
         fields = '__all__'
         read_only_fields = ['id', ]
+
 
 class RoomBookingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,17 +26,20 @@ class RoomBookingSerializer(serializers.ModelSerializer):
         def get_total_price(self, obj):
             return obj.calculate_total_price()
 
+
 class GuestServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = GuestService
         fields = '__all__'
         read_only_fields = ['id', ]
 
+
 class FeedbackReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackReview
         fields = '__all__'
         read_only_fields = ['id', ]
+
 
 class AccommodationCalculatePriceSerializer(serializers.Serializer):
     room_id = serializers.IntegerField(required=True)

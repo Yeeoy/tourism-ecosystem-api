@@ -6,9 +6,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from apps.accommodation_management.models import RoomBooking, Accommodation, RoomType
+from apps.accommodation.models import RoomBooking, Accommodation, RoomType
 
-ROOM_BOOKING_URL = reverse('accommodation_management:room-booking-list')
+ROOM_BOOKING_URL = reverse('accommodation:room-booking-list')
 
 
 def create_room_booking(**params):
@@ -21,7 +21,7 @@ def create_user(**params):
 
 def detail_url(room_booking_id):
     return reverse(
-        'accommodation_management:room-booking-detail',
+        'accommodation:room-booking-detail',
         args=[room_booking_id]
     )
 
@@ -155,6 +155,7 @@ class PublicRoomBookingAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data['total_price'], '200.00')
 
+
 class PrivateRoomBookingAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -265,9 +266,3 @@ class PrivateRoomBookingAPITests(TestCase):
         self.user.is_staff = True
         res = self.client.delete(detail_url(room_booking.id))
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-
-
-
-
-
-

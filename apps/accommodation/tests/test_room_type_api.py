@@ -6,52 +6,56 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from apps.accommodation_management.models import RoomType, Accommodation
+from apps.accommodation.models import RoomType, Accommodation
 
-ROOM_TYPE_URL = reverse('accommodation_management:room-type-list')
+ROOM_TYPE_URL = reverse('accommodation:room-type-list')
+
 
 def create_room_type(**params):
     return RoomType.objects.create(**params)
 
+
 def create_user(**params):
     return get_user_model().objects.create_user(**params)
 
+
 def detail_url(room_type_id):
     return reverse(
-        'accommodation_management:room-type-detail',
+        'accommodation:room-type-detail',
         args=[room_type_id]
     )
+
 
 class PublicRoomTypeAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.accommodation = Accommodation.objects.create(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
     def test_retrieve_room_types(self):
         create_room_type(
-            accommodation_id = self.accommodation,
-            room_type = 'Test Room Type',
-            price_per_night = 100.00,
-            max_occupancy = 2,
-            availability = True
+            accommodation_id=self.accommodation,
+            room_type='Test Room Type',
+            price_per_night=100.00,
+            max_occupancy=2,
+            availability=True
         )
 
         create_room_type(
-            accommodation_id = self.accommodation,
-            room_type = 'Test Room Type 2',
-            price_per_night = 200.00,
-            max_occupancy = 4,
-            availability = True
+            accommodation_id=self.accommodation,
+            room_type='Test Room Type 2',
+            price_per_night=200.00,
+            max_occupancy=4,
+            availability=True
         )
 
         res = self.client.get(ROOM_TYPE_URL)
@@ -64,11 +68,11 @@ class PublicRoomTypeAPITests(TestCase):
 
     def test_retrieve_room_type_detail(self):
         room_type = create_room_type(
-            accommodation_id = self.accommodation,
-            room_type = 'Test Room Type',
-            price_per_night = Decimal('100.00'),
-            max_occupancy = 2,
-            availability = True
+            accommodation_id=self.accommodation,
+            room_type='Test Room Type',
+            price_per_night=Decimal('100.00'),
+            max_occupancy=2,
+            availability=True
         )
 
         res = self.client.get(detail_url(room_type.id))
@@ -78,6 +82,7 @@ class PublicRoomTypeAPITests(TestCase):
         self.assertEqual(res.data['price_per_night'], str(room_type.price_per_night))
         self.assertEqual(res.data['max_occupancy'], room_type.max_occupancy)
         self.assertEqual(res.data['availability'], room_type.availability)
+
 
 class PrivateRoomTypeAPITests(TestCase):
     def setUp(self):
@@ -90,15 +95,15 @@ class PrivateRoomTypeAPITests(TestCase):
 
     def test_create_room_type(self):
         accommodation = Accommodation.objects.create(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
         payload = {
@@ -122,23 +127,23 @@ class PrivateRoomTypeAPITests(TestCase):
 
     def test_update_room_type(self):
         accommodation = Accommodation.objects.create(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
         room_type = create_room_type(
-            accommodation_id = accommodation,
-            room_type = 'Test Room Type',
-            price_per_night = Decimal('100.00'),
-            max_occupancy = 2,
-            availability = True
+            accommodation_id=accommodation,
+            room_type='Test Room Type',
+            price_per_night=Decimal('100.00'),
+            max_occupancy=2,
+            availability=True
         )
 
         payload = {
@@ -165,23 +170,23 @@ class PrivateRoomTypeAPITests(TestCase):
 
     def test_delete_room_type(self):
         accommodation = Accommodation.objects.create(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
         room_type = create_room_type(
-            accommodation_id = accommodation,
-            room_type = 'Test Room Type',
-            price_per_night = Decimal('100.00'),
-            max_occupancy = 2,
-            availability = True
+            accommodation_id=accommodation,
+            room_type='Test Room Type',
+            price_per_night=Decimal('100.00'),
+            max_occupancy=2,
+            availability=True
         )
 
         url = detail_url(room_type.id)

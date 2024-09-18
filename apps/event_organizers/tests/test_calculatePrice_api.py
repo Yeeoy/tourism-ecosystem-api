@@ -75,7 +75,6 @@ class CalculatePriceAPITests(TestCase):
         # 折扣后价格 (100 * 0.80 = 80)
         expected_total = base_amount * Decimal(discount)
 
-
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(Decimal(res.data['total_amount']), expected_total)
 

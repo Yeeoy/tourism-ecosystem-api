@@ -6,47 +6,51 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from apps.accommodation_management.models import GuestService, Accommodation
+from apps.accommodation.models import GuestService, Accommodation
 
-GUEST_SERVICE_API_URL = reverse('accommodation_management:guest-service-list')
+GUEST_SERVICE_API_URL = reverse('accommodation:guest-service-list')
+
 
 def create_guest_service(**params):
     return GuestService.objects.create(**params)
 
-def create_user(email = 'user@example.com', password = 'password123'):
-    return get_user_model().objects.create_user(email = email, password = password)
+
+def create_user(email='user@example.com', password='password123'):
+    return get_user_model().objects.create_user(email=email, password=password)
+
 
 def detail_url(guest_service_id):
-    return reverse('accommodation_management:guest-service-detail', args = [guest_service_id])
+    return reverse('accommodation:guest-service-detail', args=[guest_service_id])
+
 
 class PublicGuestServiceAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.accommodation = Accommodation.objects.create(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
     def test_retrieve_guest_services(self):
         create_guest_service(
-            accommodation_id = self.accommodation,
-            service_name = 'Test Service',
-            price = Decimal('100.00'),
-            availability_hours = '09:00 - 17:00'
+            accommodation_id=self.accommodation,
+            service_name='Test Service',
+            price=Decimal('100.00'),
+            availability_hours='09:00 - 17:00'
         )
 
         create_guest_service(
-            accommodation_id = self.accommodation,
-            service_name = 'Test Service 2',
-            price = Decimal('200.00'),
-            availability_hours = '09:00 - 17:00'
+            accommodation_id=self.accommodation,
+            service_name='Test Service 2',
+            price=Decimal('200.00'),
+            availability_hours='09:00 - 17:00'
         )
 
         res = self.client.get(GUEST_SERVICE_API_URL)
@@ -56,10 +60,10 @@ class PublicGuestServiceAPITests(TestCase):
 
     def test_retrieve_guest_service_detail(self):
         guest_service = create_guest_service(
-            accommodation_id = self.accommodation,
-            service_name = 'Test Service',
-            price = Decimal('100.00'),
-            availability_hours = '09:00 - 17:00'
+            accommodation_id=self.accommodation,
+            service_name='Test Service',
+            price=Decimal('100.00'),
+            availability_hours='09:00 - 17:00'
         )
 
         url = detail_url(guest_service.id)
@@ -70,6 +74,7 @@ class PublicGuestServiceAPITests(TestCase):
         self.assertEqual(res.data['price'], str(guest_service.price))
         self.assertEqual(res.data['availability_hours'], guest_service.availability_hours)
 
+
 class PrivateGuestServiceAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -77,15 +82,15 @@ class PrivateGuestServiceAPITests(TestCase):
         self.client.force_authenticate(self.user)
 
         self.accommodation = Accommodation.objects.create(
-            name = 'Test Accommodation',
-            location = 'Test Location',
-            star_rating = 4,
-            total_rooms = 100,
-            amenities = 'Test amenities',
-            type = 'Test type',
-            check_in_time = '09:00:00',
-            check_out_time = '17:00:00',
-            contact_info = 'Test contact info'
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            type='Test type',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
         )
 
     def test_create_guest_service(self):
@@ -108,7 +113,7 @@ class PrivateGuestServiceAPITests(TestCase):
         self.assertEqual(res.data['price'], str(payload['price']))
         self.assertEqual(res.data['availability_hours'], payload['availability_hours'])
 
-        guest_service = GuestService.objects.get(id = res.data['id'])
+        guest_service = GuestService.objects.get(id=res.data['id'])
         self.assertEqual(guest_service.accommodation_id, self.accommodation)
         self.assertEqual(guest_service.service_name, payload['service_name'])
         self.assertEqual(guest_service.price, payload['price'])
@@ -116,10 +121,10 @@ class PrivateGuestServiceAPITests(TestCase):
 
     def test_update_guest_service(self):
         guest_service = create_guest_service(
-            accommodation_id = self.accommodation,
-            service_name = 'Test Service',
-            price = Decimal('100.00'),
-            availability_hours = '09:00 - 17:00'
+            accommodation_id=self.accommodation,
+            service_name='Test Service',
+            price=Decimal('100.00'),
+            availability_hours='09:00 - 17:00'
         )
 
         payload = {
@@ -145,10 +150,10 @@ class PrivateGuestServiceAPITests(TestCase):
 
     def test_delete_guest_service(self):
         guest_service = create_guest_service(
-            accommodation_id = self.accommodation,
-            service_name = 'Test Service',
-            price = Decimal('100.00'),
-            availability_hours = '09:00 - 17:00'
+            accommodation_id=self.accommodation,
+            service_name='Test Service',
+            price=Decimal('100.00'),
+            availability_hours='09:00 - 17:00'
         )
 
         url = detail_url(guest_service.id)
@@ -161,4 +166,4 @@ class PrivateGuestServiceAPITests(TestCase):
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(GuestService.objects.filter(id = guest_service.id).exists())
+        self.assertFalse(GuestService.objects.filter(id=guest_service.id).exists())

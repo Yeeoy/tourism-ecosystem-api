@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # Create your models here.
 class Destination(models.Model):
     name = models.CharField(max_length=255)
@@ -11,6 +12,7 @@ class Destination(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Tour(models.Model):
     destination = models.ForeignKey('Destination', on_delete=models.CASCADE)
@@ -25,6 +27,7 @@ class Tour(models.Model):
     def __str__(self):
         return self.name
 
+
 class EventNotification(models.Model):
     user = models.ForeignKey('customUser.User', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
@@ -33,7 +36,6 @@ class EventNotification(models.Model):
     location = models.CharField(max_length=255)
     entry_fee = models.DecimalField(max_digits=10, decimal_places=2)
     target_audience = models.CharField(max_length=255)
-
 
     def __str__(self):
         return self.title

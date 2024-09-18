@@ -9,17 +9,20 @@ class RestaurantSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', ]
 
+
 class TableReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = TableReservation
         fields = '__all__'
         read_only_fields = ['id', ]
 
+
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         fields = '__all__'
         read_only_fields = ['id', ]
+
 
 class OnlineOrderSerializer(serializers.ModelSerializer):
     class Meta:

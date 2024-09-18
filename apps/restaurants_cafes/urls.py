@@ -5,9 +5,9 @@ from apps.restaurants_cafes.views import RestaurantViewSet, TableReservationView
 app_name = 'restaurants_cafes'
 
 router = DefaultRouter()
-router.register('restaurant', RestaurantViewSet, basename='restaurant')
-router.register('table-reservations', TableReservationViewSet)
-router.register('menus', MenuViewSet)
-router.register('online-orders', OnlineOrderViewSet)
+router.register('restaurants', RestaurantViewSet, basename='restaurant')
+router.register('table-reservations', TableReservationViewSet, basename='table-reservation')
+router.register('menus', MenuViewSet, basename='menu')
+router.register('online-orders', OnlineOrderViewSet, basename='online-order')
 
 urlpatterns = router.urls

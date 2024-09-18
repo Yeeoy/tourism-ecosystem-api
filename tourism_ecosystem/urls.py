@@ -15,7 +15,7 @@ urlpatterns = [
     path('api/customUser/', include("apps.customUser.urls")),
 
     # Accommodation Management APIs
-    path('api/accoMgmt/', include("apps.accommodation_management.urls")),
+    path('api/accoMgmt/', include("apps.accommodation.urls")),
 
     # Event Organizer APIs
     path('api/events/', include("apps.event_organizers.urls")),
@@ -25,7 +25,4 @@ urlpatterns = [
 
     # Dining APIs
     path('api/dining/', include("apps.restaurants_cafes.urls")),
-
-    # Tour and Event Services APIs
-    path('api/tours/', include("apps.tour_event_services.urls")),
 ]
