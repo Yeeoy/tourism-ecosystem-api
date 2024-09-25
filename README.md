@@ -1,38 +1,68 @@
-This is a CRUD api for a tourism ecosystem built with Django Rest Framework
 
-## Installation
+## Installation Steps
 
-```bash
-# how to run the project
-# to install the dependencies
-pip install -r requirements.txt
-# to run the server
-python manage.py runserver 
-```
+1. Clone the repository:
+   ```
+   git clone https://github.com/Yeeoy/tourism-ecosystem-api.git
 
-## Migrations
+   cd tourism-ecosystem-api
+   ```
 
-```bash
-# if you change the models you need to run the following commands
-# to create the migrations
-python manage.py makemigrations 
-# to apply the migrations
-python manage.py migrate 
-```
+2. Create and activate a virtual environment:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use venv\Scripts\activate
+   ```
 
-# Run the tests
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
 
-```bash
-# to run the tests
-python manage.py test 
-```
+4. Perform database migrations:
+   ```
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
 
-# Usage
+5. Create a superuser (optional):
+   ```
+   python manage.py createsuperuser
+   ```
 
-## Admin backend
+6. Run the development server:
+   ```
+   python manage.py runserver
+   ```
+
+You can now access the project at http://localhost:8000.
+
+
+
+## Usage Guide
+
+### Admin Backend
+
+The admin interface can be accessed at:
 http://localhost:8000/admin
 
-```
-superuser: admin@uow.com
-password: uowadmin
-```
+Admin login credentials:
+- Username: admin@uow.com
+- Password: uowadmin
+
+### API Endpoints
+
+Our project provides the following main API endpoints:
+
+- `/api/customUser/`: User-related operations
+- `/api/accommodation/`: Accommodation management
+- `/api/events/`: Event organizer operations
+- `/api/transport-services/`: Local transportation services
+- `/api/dining/`: Restaurant and café related operations
+- `/api/tourism-info/`: Tourism information center services
+
+For detailed API documentation and interactive testing, visit:
+- API Schema: `/api/schema/`
+- Swagger UI: `/api/docs/` or the root URL `/`
+
+
