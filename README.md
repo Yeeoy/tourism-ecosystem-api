@@ -27,16 +27,6 @@ python manage.py migrate
 python manage.py test 
 ```
 
-# DataBase
-
-**host:** 192.9.160.69 
-
-**port:** 3306
-
-**user:** tour_eco
-
-**password:** UOWCSCI927
-
 # Usage
 
 ## Admin backend

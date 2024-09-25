@@ -25,4 +25,9 @@ urlpatterns = [
 
     # Dining APIs
     path('api/dining/', include("apps.restaurants_cafes.urls")),
+
+    # Tourism Information Center APIs
+    path('api/tourism-info/', include("apps.tourism_information_center.urls")),
+
+
 ]

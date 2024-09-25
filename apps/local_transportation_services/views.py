@@ -1,4 +1,5 @@
 # Create your views here.
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 
 from apps.local_transportation_services.models import TransportationProvider, RideBooking, RoutePlanning, TrafficUpdate
@@ -7,12 +8,14 @@ from apps.local_transportation_services.serializers import TransportationService
 from tourism_ecosystem.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
 
 
+@extend_schema(tags=['LTS - Transportation Provider'])
 class TransportationProviderViewSet(viewsets.ModelViewSet):
     queryset = TransportationProvider.objects.all()
     serializer_class = TransportationServiceSerializer
     permission_classes = [IsAdminOrReadOnly]
 
 
+@extend_schema(tags=['LTS - Ride Booking'])
 class RideBookingViewSet(viewsets.ModelViewSet):
     queryset = RideBooking.objects.all()
     serializer_class = RideBookingSerializer
@@ -27,12 +30,14 @@ class RideBookingViewSet(viewsets.ModelViewSet):
         return RideBooking.objects.filter(user_id=user)
 
 
+@extend_schema(tags=['LTS - Route Planning'])
 class RoutePlanningViewSet(viewsets.ModelViewSet):
     queryset = RoutePlanning.objects.all()
     serializer_class = RoutePlanningSerializer
     permission_classes = [IsAdminOrReadOnly]
 
 
+@extend_schema(tags=['LTS - Traffic Update'])
 class TrafficUpdateViewSet(viewsets.ModelViewSet):
     queryset = TrafficUpdate.objects.all()
     serializer_class = TrafficUpdateSerializer

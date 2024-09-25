@@ -16,20 +16,19 @@ class Destination(models.Model):
 
 class Tour(models.Model):
     destination = models.ForeignKey('Destination', on_delete=models.CASCADE)
-    user = models.ForeignKey('customUser.User', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     tour_type = models.CharField(max_length=255)
-    duration = models.PositiveIntegerField()
+    duration = models.CharField(max_length=255)
     price_per_person = models.DecimalField(max_digits=10, decimal_places=2)
     max_capacity = models.PositiveIntegerField()
     tour_date = models.DateField()
+    guide_name = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
 
 
 class EventNotification(models.Model):
-    user = models.ForeignKey('customUser.User', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     event_date = models.DateField()

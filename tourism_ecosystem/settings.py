@@ -83,16 +83,24 @@ WSGI_APPLICATION = "tourism_ecosystem.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "tour_eco",
+#         "USER": "tour_eco",
+#         "PASSWORD": "UOWCSCI927",
+#         "HOST": "192.9.160.69",
+#         "PORT": "3306",
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "tour_eco",
-        "USER": "tour_eco",
-        "PASSWORD": "UOWCSCI927",
-        "HOST": "192.9.160.69",
-        "PORT": "3306",
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
 
 # Switch to SQLite in-memory database if running tests
 if 'test' in sys.argv:
@@ -185,6 +193,9 @@ CORS_ALLOWED_ORIGINS = [
 
 # 受信任的 CSRF 来源
 CSRF_TRUSTED_ORIGINS = ['http://192.9.160.69', 'http://192.9.160.69:8000']
+
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Logging Configuration
 LOGGING = {
