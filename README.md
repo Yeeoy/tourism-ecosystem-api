@@ -5,7 +5,7 @@ This is a CRUD api for a tourism ecosystem built with Django Rest Framework
 ```bash
 # how to run the project
 # to install the dependencies
-pip install -r requirements.txt 
+pip install -r requirements.txt
 # to run the server
 python manage.py runserver 
 ```
@@ -33,6 +33,6 @@ python manage.py test
 http://localhost:8000/admin
 
 ```
-superuser: admin@example.com
+superuser: admin@uow.com
 password: uowadmin
 ```
