@@ -1,7 +1,9 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, authentication, permissions
+from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from apps.customUser.serializers import (
@@ -22,6 +24,21 @@ class CreateUserView(generics.CreateAPIView):
 class CreateTokenView(ObtainAuthToken):
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
+    def post(self, request, *args, **kwargs):
+        # Validate and authenticate the user
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+
+        # Create or retrieve the authentication token for the user
+        token, created = Token.objects.get_or_create(user=user)
+
+        # Return response with token and user_id
+        return Response({
+            'token': token.key,
+            'user_id': user.id,
+        })
 
 
 # A generic view class for handling GET and PUT requests, allowing the retrieval and update of objects
