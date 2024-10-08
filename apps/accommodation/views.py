@@ -1,7 +1,7 @@
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from apps.accommodation.models import Accommodation, RoomType, RoomBooking, GuestService, FeedbackReview
@@ -93,3 +93,30 @@ class FeedbackReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatically sets the current login user to user
         serializer.save(user=self.request.user)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='accommodation_id', description='住宿的ID', required=True, type=int)
+        ],
+        responses={200: FeedbackReviewSerializer(many=True)},
+    )
+    @action(detail=False, methods=['get'],
+            url_path='feedback-by-accommodation',
+            permission_classes=[AllowAny])
+    def retrieve_feedback_by_accommodation(self, request, *args, **kwargs):
+        """
+        Retrieve all feedback ratings for a given accommodation by accommodation_id
+        """
+        # Get accommodation_id parameter
+        accommodation_id = request.query_params.get('accommodation_id')
+
+        if not accommodation_id:
+            return Response({'error': 'The accommodation_id parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Filter reviews by accommodation_id
+        feedbacks = self.queryset.filter(accommodation_id=accommodation_id)
+
+        # Serialized data
+        serializer = self.get_serializer(feedbacks, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
