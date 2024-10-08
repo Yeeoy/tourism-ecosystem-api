@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import Accommodation, RoomType, RoomBooking, GuestService, FeedbackReview
+
 
 @admin.register(Accommodation)
 class AccommodationAdmin(admin.ModelAdmin):
@@ -17,7 +19,10 @@ class RoomTypeAdmin(admin.ModelAdmin):
 
 @admin.register(RoomBooking)
 class RoomBookingAdmin(admin.ModelAdmin):
-    list_display = ('room_type_id', 'accommodation_id', 'user_id', 'check_in_date', 'check_out_date', 'total_price', 'booking_status', 'payment_status')
+    list_display = (
+        'room_type_id', 'accommodation_id', 'user_id', 'check_in_date', 'check_out_date', 'total_price',
+        'booking_status',
+        'payment_status')
     search_fields = ('accommodation_id__name', 'room_type_id__room_type', 'user_id__username')
     list_filter = ('booking_status', 'payment_status', 'check_in_date', 'check_out_date')
 
@@ -34,4 +39,3 @@ class FeedbackReviewAdmin(admin.ModelAdmin):
     list_display = ('accommodation_id', 'user', 'rating', 'date')
     search_fields = ('accommodation_id__name', 'user__username')
     list_filter = ('rating', 'date')
-

@@ -2,13 +2,13 @@ from rest_framework import permissions
 from rest_framework.permissions import BasePermission
 
 
-# 自定义权限 - 只允许用户查看和修改自己的对象
+# Custom permission - only allows users to view and modify their own objects
 class IsOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        # 管理员有所有权限
+        # Admin has all permissions
         if request.user.is_staff:
             return True
-        # 普通用户只能查看和修改自己的对象
+        # Regular users can only view and modify their own objects
         return obj.user == request.user
 
 

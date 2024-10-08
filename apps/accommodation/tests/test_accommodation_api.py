@@ -161,7 +161,7 @@ class PrivateAccommodationAPITests(TestCase):
         self.assertEqual(accommodation.total_rooms, payload['total_rooms'])
         self.assertEqual(accommodation.amenities, payload['amenities'])
         self.assertEqual(accommodation.type, payload['type'])
-        # 将 accommodation.check_in_time 转换为字符串
+        # Convert accommodation.check_in_time to string
         self.assertEqual(accommodation.check_in_time.strftime('%H:%M:%S'), payload['check_in_time'])
         self.assertEqual(accommodation.check_out_time.strftime('%H:%M:%S'), payload['check_out_time'])
         self.assertEqual(accommodation.contact_info, payload['contact_info'])
