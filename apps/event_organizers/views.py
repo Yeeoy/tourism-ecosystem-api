@@ -18,28 +18,26 @@ from .serializers import (EventSerializer, VenueBookingSerializer,
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [IsAdminOrReadOnly]  # 只有管理员可以访问
+    permission_classes = [IsAdminOrReadOnly]  # Only admin can access
 
 
 @extend_schema(tags=['EO - Venue Booking'])
 class VenueBookingViewSet(viewsets.ModelViewSet):
     queryset = VenueBooking.objects.all()
     serializer_class = VenueBookingSerializer
-    permission_classes = [IsAuthenticated]  # 只有认证用户可以访问
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access
 
     def perform_create(self, serializer):
-        # 自动将当前登录用户设置为 user_id
+        # Automatically set the current logged-in user as user_id
         print(self.request.user)
         serializer.save(user_id=self.request.user)
 
-        # 重写 get_queryset 方法，根据权限过滤订单
-
     def get_queryset(self):
         user = self.request.user
-        # 如果是管理员用户，返回所有订单
+        # If the user is an admin, return all bookings
         if user.is_staff or user.is_superuser:
             return VenueBooking.objects.all()
-        # 如果是普通用户，只返回与当前用户相关的订单
+        # If the user is a regular user, return only the bookings related to the current user
         return VenueBooking.objects.filter(user_id=user)
 
     @action(detail=False,
@@ -49,26 +47,26 @@ class VenueBookingViewSet(viewsets.ModelViewSet):
             serializer_class=EventBookingCalculatePriceSerializer)
     def calculate_price(self, request, *args, **kwargs):
         """
-        计算并返回总金额，只需要事件和票数作为参数
+        Calculate and return the total amount, only event and ticket count are required as parameters
         """
-        # 使用自定义的序列化器进行数据验证
+        # Use custom serializer for data validation
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # 从序列化器中获取经过验证的参数
+        # Get validated parameters from the serializer
         event_id = serializer.validated_data.get('event')
         number_of_tickets = serializer.validated_data.get('number_of_tickets')
-        discount = 1  # 默认折扣为1
+        discount = 1  # Default discount is 1
         discount_amount = 0
         try:
-            # 获取事件对象
+            # Get the event object
             event = Event.objects.get(id=event_id)
-            # 使用 Decimal 进行金额计算
+            # Use Decimal for monetary calculations
             ticket_price = Decimal(event.entry_fee)
-            # 确保所有金额计算使用 Decimal
+            # Ensure all monetary calculations use Decimal
             base_amount = ticket_price * Decimal(number_of_tickets)
 
-            # 检查是否有促销活动
+            # Check if there is a promotion
             promotion = EventPromotion.objects.filter(
                 event=event,
                 promotion_start_date__lte=timezone.now().date(),
@@ -78,12 +76,12 @@ class VenueBookingViewSet(viewsets.ModelViewSet):
             if promotion:
                 discount = Decimal(promotion.discount)
 
-                # 判断折扣是小数还是百分数
+                # Determine if the discount is a decimal or a percentage
                 if discount <= 1:
-                    # 如果折扣小于1，直接作为小数使用
+                    # If the discount is less than 1, use it directly as a decimal
                     discount_amount = base_amount * (1 - discount)
                 else:
-                    # 超过1的折扣抛出错误
+                    # Throw an error if the discount exceeds 1
                     return Response(
                         {"detail": "Discount value cannot be greater than 1."},
                         status=status.HTTP_400_BAD_REQUEST)
@@ -92,7 +90,7 @@ class VenueBookingViewSet(viewsets.ModelViewSet):
             else:
                 total_amount = base_amount
 
-                # 返回计算后的总金额
+            # Return the calculated total amount
             return Response(
                 {"event": event_id,
                  "ticket_price": ticket_price,
@@ -114,4 +112,4 @@ class VenueBookingViewSet(viewsets.ModelViewSet):
 class EventPromotionViewSet(viewsets.ModelViewSet):
     queryset = EventPromotion.objects.all()
     serializer_class = EventPromotionSerializer
-    permission_classes = [IsAdminOrReadOnly]  # 只有管理员可以访问
+    permission_classes = [IsAdminOrReadOnly]  # Only admin can access

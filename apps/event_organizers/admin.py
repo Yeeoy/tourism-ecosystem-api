@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Event, VenueBooking, EventPromotion
 
 
-# 注册 Event 模型
+# Register the Event model
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display = ('name', 'venue', 'event_date', 'start_time', 'end_time', 'entry_fee', 'max_participants')
@@ -13,7 +13,7 @@ class EventAdmin(admin.ModelAdmin):
     date_hierarchy = 'event_date'
 
 
-# 注册 VenueBooking 模型
+# Register the VenueBooking model
 @admin.register(VenueBooking)
 class VenueBookingAdmin(admin.ModelAdmin):
     list_display = ('event_id', 'booking_date', 'number_of_tickets', 'total_amount', 'booking_status', 'promotion_id')
@@ -23,7 +23,7 @@ class VenueBookingAdmin(admin.ModelAdmin):
     date_hierarchy = 'booking_date'
 
 
-# 注册 EventPromotion 模型
+# Register the EventPromotion model
 @admin.register(EventPromotion)
 class EventPromotionAdmin(admin.ModelAdmin):
     list_display = ('event', 'promotion_start_date', 'promotion_end_date', 'discount')

@@ -45,8 +45,8 @@ class OnlineOrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # 如果是管理员用户，返回所有订单
+        # If admin user, return all orders
         if user.is_staff or user.is_superuser:
             return OnlineOrder.objects.all()
-        # 如果是普通用户，只返回与当前用户相关的订单
+        # In case of a regular user, only orders related to the current user are returned
         return OnlineOrder.objects.filter(user_id=user)

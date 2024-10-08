@@ -6,11 +6,11 @@ from apps.customUser import models
 
 
 class UserAdmin(BaseUserAdmin):
-    # 定义后台管理页面中用户列表的排序方式，这里是按照用户ID升序排序。
+    # Define the ordering of the user list in the admin page, here it is sorted by user ID in ascending order.
     ordering = ["id"]
-    # 在用户列表页面显示用户的email和name字段，方便管理员快速查看重要信息。
+    # Display the email and name fields in the user list page, allowing administrators to quickly view important information.
     list_display = ["email", "name"]
-    # 定义了用户编辑页面的字段布局，将不同类别的字段分组展示。
+    # Define the field layout of the user edit page, grouping different categories of fields.
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         (
@@ -21,17 +21,17 @@ class UserAdmin(BaseUserAdmin):
             _("Important dates"), {"fields": ("last_login",)}
         ),
     )
-    # 指定last_login字段为只读
-    # 管理员在后台无法修改这个字段
-    # 它会自动更新为用户的上次登录时间
+    # Specify the last_login field as read-only
+    # Administrators cannot modify this field in the admin
+    # It will automatically update to the user's last login time
     readonly_fields = ["last_login"]
     add_fieldsets = (
         (
             None,
             {
-                # 是一个CSS类，用来让表单显示得更加宽敞
+                # A CSS class to make the form display more spacious
                 "classes": ("wide",),
-                # 定义了用户编辑页面的字段布局，将不同类别的字段分组展示
+                # Define the field layout of the user edit page, grouping different categories of fields
                 "fields": (
                     "email",
                     "password1",
@@ -46,5 +46,5 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
-# 模型注册到Django Admin中，使管理员可以通过后台界面管理这些模型的数据。
+# Register the model to the Django Admin, allowing administrators to manage the model data through the admin interface.
 admin.site.register(models.User, UserAdmin)

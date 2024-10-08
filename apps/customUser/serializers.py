@@ -3,60 +3,60 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 
-# 用户序列化器
+# User serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = get_user_model()  # 获取用户模型
-        fields = ['email', 'password', 'name']  # 序列化的字段
-        # 附加关键字参数
+        model = get_user_model()  # Get the user model
+        fields = ['email', 'password', 'name']  # Fields to be serialized
+        # Additional keyword arguments
         extra_kwargs = {
             'password': {
-                'write_only': True,  # 密码字段只写
-                'min_length': 5  # 密码最小长度为5
+                'write_only': True,  # Password field is write-only
+                'min_length': 5  # Minimum length for the password is 5
             }
         }
 
-    # 创建用户
+    # Create user
     def create(self, validated_data):
-        # 使用验证后的数据创建用户
+        # Create a user using the validated data
         return get_user_model().objects.create_user(**validated_data)
 
-    # 更新用户
+    # Update user
     def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)  # 从验证数据中移除密码
-        user = super().update(instance, validated_data)  # 更新用户的其他字段
+        password = validated_data.pop('password', None)  # Remove password from validated data
+        user = super().update(instance, validated_data)  # Update other fields of the user
 
         if password:
-            user.set_password(password)  # 设置新密码
-            user.save()  # 保存用户
+            user.set_password(password)  # Set new password
+            user.save()  # Save the user
 
-        return user  # 返回更新后的用户
+        return user  # Return the updated user
 
 
-# 认证令牌序列化器
+# Authentication token serializer
 class AuthTokenSerializer(serializers.Serializer):
-    email = serializers.CharField()  # 邮箱字段
+    email = serializers.CharField()  # Email field
     password = serializers.CharField(
-        style={'input_type': 'password'},  # 密码字段的输入类型为密码
-        trim_whitespace=False  # 不去除空白字符
+        style={'input_type': 'password'},  # Input type for the password field is password
+        trim_whitespace=False  # Do not trim whitespace
     )
 
-    # 验证方法
+    # Validation method
     def validate(self, attrs):
-        email = attrs.get('email')  # 获取邮箱
-        password = attrs.get('password')  # 获取密码
+        email = attrs.get('email')  # Get email
+        password = attrs.get('password')  # Get password
 
         user = authenticate(
-            request=self.context.get('request'),  # 获取请求上下文
-            username=email,  # 使用邮箱作为用户名
-            password=password  # 使用提供的密码
+            request=self.context.get('request'),  # Get request context
+            username=email,  # Use email as username
+            password=password  # Use provided password
         )
 
         if not user:
-            # 无法使用提供的凭据进行认证
+            # Unable to authenticate with provided credentials
             msg = _('Unable to authenticate with provided credentials')
-            # 抛出验证错误
+            # Raise validation error
             raise serializers.ValidationError(msg, code='authorization')
 
-        attrs['user'] = user  # 将用户添加到验证数据中
-        return attrs  # 返回验证数据
+        attrs['user'] = user  # Add user to validated data
+        return attrs  # Return validated data

@@ -40,13 +40,13 @@ class RoomBooking(models.Model):
     payment_status = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        # 确保 check_in_date 和 check_out_date 是日期类型
+        # Ensure check_in_date and check_out_date are date types
         if isinstance(self.check_in_date, str):
             self.check_in_date = datetime.strptime(self.check_in_date, '%Y-%m-%d').date()
         if isinstance(self.check_out_date, str):
             self.check_out_date = datetime.strptime(self.check_out_date, '%Y-%m-%d').date()
 
-        # 计算总价
+        # Calculate the total price
         self.total_price = self.room_type_id.price_per_night * (self.check_out_date - self.check_in_date).days
         super(RoomBooking, self).save(*args, **kwargs)
 

@@ -1,15 +1,15 @@
 from django.contrib.auth.models import (
-    AbstractBaseUser,  # AbstractBaseUser是Django提供的一个基类，用于自定义用户模型
-    BaseUserManager,  # BaseUserManager是Dango自定义用户模型的管理类，可以控制用户创建流程
-    PermissionsMixin  # PermissionsMixin是Django提供的一个基类，用于添加用户权限相关的功能
+    AbstractBaseUser,  # AbstractBaseUser is a base class provided by Django for custom user models
+    BaseUserManager,  # BaseUserManager is a manager class for custom user models, controlling the user creation process
+    PermissionsMixin  # PermissionsMixin is a base class provided by Django for adding user permissions functionality
 )
 from django.db import models
 
 
 # Create your models here.
-# 自定义用户管理类
+# Custom user manager class
 class UserManager(BaseUserManager):
-    # 创建用户
+    # Create a user
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('User must have an email address')
@@ -19,7 +19,7 @@ class UserManager(BaseUserManager):
 
         return user
 
-    # 创建超级用户
+    # Create a superuser
     def create_superuser(self, email, password):
         user = self.create_user(email, password)
         user.is_superuser = True
@@ -29,7 +29,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-# 自定义用户模型
+# Custom user model
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)

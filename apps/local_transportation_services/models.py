@@ -1,4 +1,3 @@
-# Create your models here.
 from datetime import datetime
 
 from django.db import models
@@ -26,7 +25,7 @@ class RideBooking(models.Model):
     booking_status = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        # 确保 ride_date 是日期类型
+        # Ensure ride_date is of date type
         if isinstance(self.ride_date, str):
             self.ride_date = datetime.strptime(self.ride_date, '%Y-%m-%d').date()
         super(RideBooking, self).save(*args, **kwargs)
@@ -52,7 +51,7 @@ class TrafficUpdate(models.Model):
     update_message = models.TextField()
 
     def save(self, *args, **kwargs):
-        # 确保 update_time 是日期时间类型
+        # Ensure update_time is of datetime type
         if isinstance(self.update_time, str):
             self.update_time = datetime.strptime(self.update_time, '%Y-%m-%d %H:%M:%S')
         super(TrafficUpdate, self).save(*args, **kwargs)

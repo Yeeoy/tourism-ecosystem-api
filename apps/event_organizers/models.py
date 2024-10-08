@@ -1,4 +1,3 @@
-# Create your models here.
 from decimal import Decimal
 
 from django.db import models
@@ -32,26 +31,26 @@ class VenueBooking(models.Model):
         return f"Booking for {self.event_id.name}"
 
     def calculate_total_amount(self):
-        # 确保 event 和 entry_fee 存在
+        # Ensure event and entry_fee exist
         if not self.event_id or not self.event_id.entry_fee:
             raise ValueError("Event and its entry fee are required to calculate the total amount.")
 
-        # 使用 Decimal 进行金额计算
+        # Use Decimal for monetary calculations
         ticket_price = Decimal(self.event_id.entry_fee)
         base_amount = ticket_price * self.number_of_tickets
         self.discount_amount = 0
 
-        # 如果有促销，应用折扣
+        # Apply discount if there is a promotion
         if self.promotion_id:
             discount_amount = base_amount * (1 - Decimal(self.promotion_id.discount))
             self.discount_amount = discount_amount
             return base_amount - discount_amount
 
-        # 没有促销时返回原始金额
+        # Return the original amount if there is no promotion
         return base_amount
 
     def save(self, *args, **kwargs):
-        # 总是计算 total_amount 而不是依赖于它是否为 None
+        # Always calculate total_amount instead of relying on whether it is None
         self.total_amount = self.calculate_total_amount()
         super(VenueBooking, self).save(*args, **kwargs)
 
