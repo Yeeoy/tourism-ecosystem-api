@@ -20,6 +20,8 @@ class RideBookingViewSet(viewsets.ModelViewSet):
     queryset = RideBooking.objects.all()
     serializer_class = RideBookingSerializer
     permission_classes = [IsOwnerOrAdmin]
+    log_event = True
+    activity_name = "Ride Booking Management"
 
     def get_queryset(self):
         user = self.request.user
@@ -35,6 +37,8 @@ class RoutePlanningViewSet(viewsets.ModelViewSet):
     queryset = RoutePlanning.objects.all()
     serializer_class = RoutePlanningSerializer
     permission_classes = [IsAdminOrReadOnly]
+    log_event = True
+    activity_name = "Route Planning Management"
 
 
 @extend_schema(tags=['LTS - Traffic Update'])
@@ -42,3 +46,5 @@ class TrafficUpdateViewSet(viewsets.ModelViewSet):
     queryset = TrafficUpdate.objects.all()
     serializer_class = TrafficUpdateSerializer
     permission_classes = [IsAdminOrReadOnly]
+    log_event = True
+    activity_name = "Traffic Update Management"

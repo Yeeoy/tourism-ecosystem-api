@@ -19,6 +19,8 @@ class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsAdminOrReadOnly]  # Only admin can access
+    log_event = True
+    activity_name = "Event Management"
 
 
 @extend_schema(tags=['EO - Venue Booking'])
@@ -26,6 +28,8 @@ class VenueBookingViewSet(viewsets.ModelViewSet):
     queryset = VenueBooking.objects.all()
     serializer_class = VenueBookingSerializer
     permission_classes = [IsAuthenticated]  # Only authenticated users can access
+    log_event = True
+    activity_name = "Venue Booking Management"
 
     def perform_create(self, serializer):
         # Automatically set the current logged-in user as user_id
@@ -113,3 +117,5 @@ class EventPromotionViewSet(viewsets.ModelViewSet):
     queryset = EventPromotion.objects.all()
     serializer_class = EventPromotionSerializer
     permission_classes = [IsAdminOrReadOnly]  # Only admin can access
+    log_event = True
+    activity_name = "Event Promotion"

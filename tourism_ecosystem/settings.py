@@ -58,6 +58,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "tourism_ecosystem.middlewares.RequestLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "tourism_ecosystem.urls"
@@ -79,20 +80,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "tourism_ecosystem.wsgi.application"
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.mysql",
-#         "NAME": "tour_eco",
-#         "USER": "tour_eco",
-#         "PASSWORD": "UOWCSCI927",
-#         "HOST": "192.9.160.69",
-#         "PORT": "3306",
-#     }
-# }
 
 DATABASES = {
     "default": {

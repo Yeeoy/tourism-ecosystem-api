@@ -15,6 +15,8 @@ class AccommodationViewSet(viewsets.ModelViewSet):
     queryset = Accommodation.objects.all()
     serializer_class = AccommodationSerializer
     permission_classes = [IsAdminOrReadOnly]
+    log_event = True
+    activity_name = "Accommodation Management"
 
 
 @extend_schema(tags=['AM - Room Type'])
@@ -22,6 +24,8 @@ class RoomTypeViewSet(viewsets.ModelViewSet):
     queryset = RoomType.objects.all()
     serializer_class = RoomTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
+    log_event = True
+    activity_name = "Room Type Management"
 
 
 @extend_schema(tags=['AM - Room Booking'])
@@ -29,6 +33,7 @@ class RoomBookingViewSet(viewsets.ModelViewSet):
     queryset = RoomBooking.objects.all()
     serializer_class = RoomBookingSerializer
     permission_classes = [IsAdminOrReadOnly]
+    log_event = True
 
     def perform_create(self, serializer):
         # Automatically sets the currently logged in user to user_id
@@ -82,6 +87,8 @@ class GuestServiceViewSet(viewsets.ModelViewSet):
     queryset = GuestService.objects.all()
     serializer_class = GuestServiceSerializer
     permission_classes = [IsAdminOrReadOnly]
+    log_event = True
+    activity_name = "Guest Service Management"
 
 
 @extend_schema(tags=['AM - Feedback Review'])
@@ -89,6 +96,8 @@ class FeedbackReviewViewSet(viewsets.ModelViewSet):
     queryset = FeedbackReview.objects.all()
     serializer_class = FeedbackReviewSerializer
     permission_classes = [IsOwnerOrAdmin]
+    log_event = True
+    activity_name = "Feedback Review"
 
     def perform_create(self, serializer):
         # Automatically sets the current login user to user

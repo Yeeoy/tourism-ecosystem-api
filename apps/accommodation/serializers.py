@@ -45,6 +45,14 @@ class AccommodationCalculatePriceSerializer(serializers.Serializer):
     room_id = serializers.IntegerField(required=True)
     number_of_days = serializers.IntegerField(required=True)
 
+    def validate_room_id(self, value):
+        """
+        Validate that the room_id exists in the database.
+        """
+        if not RoomType.objects.filter(id=value).exists():
+            raise serializers.ValidationError(f"Room with id {value} does not exist.")
+        return value
+
     def validate_number_of_days(self, value):
         if value <= 0:
             raise serializers.ValidationError("The number of days must be a positive integer.")
