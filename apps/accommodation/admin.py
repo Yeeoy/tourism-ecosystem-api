@@ -5,14 +5,20 @@ from .models import Accommodation, RoomType, RoomBooking, GuestService, Feedback
 
 @admin.register(Accommodation)
 class AccommodationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location', 'star_rating', 'total_rooms', 'type', 'contact_info')
-    search_fields = ('name', 'location')
-    list_filter = ('star_rating', 'type')
+    list_display = ('name', 'location', 'star_rating', 'total_rooms', 'display_types')
+    list_filter = ('location', 'types')
+    search_fields = ('name', 'location', 'types__room_type')
+
+    # 定义一个方法来显示多对多的房型（RoomTypes）
+    def display_types(self, obj):
+        return ", ".join([room_type.room_type for room_type in obj.types.all()])
+
+    display_types.short_description = 'Room Types'
 
 
 @admin.register(RoomType)
 class RoomTypeAdmin(admin.ModelAdmin):
-    list_display = ('room_type', 'accommodation_id', 'price_per_night', 'max_occupancy', 'availability')
+    list_display = ('room_type', 'price_per_night', 'max_occupancy', 'availability')
     search_fields = ('room_type',)
     list_filter = ('availability', 'max_occupancy')
 
@@ -20,7 +26,7 @@ class RoomTypeAdmin(admin.ModelAdmin):
 @admin.register(RoomBooking)
 class RoomBookingAdmin(admin.ModelAdmin):
     list_display = (
-        'room_type_id', 'accommodation_id', 'user_id', 'check_in_date', 'check_out_date', 'total_price',
+        'room_type_id', 'user_id', 'check_in_date', 'check_out_date', 'total_price',
         'booking_status',
         'payment_status')
     search_fields = ('accommodation_id__name', 'room_type_id__room_type', 'user_id__username')

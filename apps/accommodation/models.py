@@ -9,7 +9,7 @@ class Accommodation(models.Model):
     star_rating = models.PositiveIntegerField()
     total_rooms = models.PositiveIntegerField()
     amenities = models.TextField()
-    type = models.CharField(max_length=255)
+    types = models.ManyToManyField('RoomType')
     check_in_time = models.TimeField()
     check_out_time = models.TimeField()
     contact_info = models.CharField(max_length=255)
@@ -19,7 +19,6 @@ class Accommodation(models.Model):
 
 
 class RoomType(models.Model):
-    accommodation_id = models.ForeignKey('Accommodation', on_delete=models.CASCADE)
     room_type = models.CharField(max_length=255)
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
     max_occupancy = models.PositiveIntegerField()

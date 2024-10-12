@@ -32,7 +32,7 @@ class RoomTypeViewSet(viewsets.ModelViewSet):
 class RoomBookingViewSet(viewsets.ModelViewSet):
     queryset = RoomBooking.objects.all()
     serializer_class = RoomBookingSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAuthenticated]
     log_event = True
 
     def perform_create(self, serializer):
@@ -50,23 +50,33 @@ class RoomBookingViewSet(viewsets.ModelViewSet):
     @action(detail=False,
             methods=['post'],
             url_path='calculate-price',
-            permission_classes=[IsAuthenticated],
+            permission_classes=[AllowAny],
             serializer_class=AccommodationCalculatePriceSerializer)
     def calculate_price(self, request, *args, **kwargs):
         """
-        Calculates and returns the total amount with only the room and days as parameters
+        Calculates and returns the total amount using accommodation_id and room_id as parameters.
         """
         # Data validation using custom serializers
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         # Getting Validated Parameters from the Serializer
+        accommodation_id = serializer.validated_data.get('accommodation_id')
         room_id = serializer.validated_data.get('room_id')
         number_of_days = serializer.validated_data.get('number_of_days')
 
-        # Get the room object
-        accommodation = Accommodation.objects.get(id=room_id)
-        room = RoomType.objects.get(id=room_id)
+        # Get the accommodation and room objects
+        try:
+            accommodation = Accommodation.objects.get(id=accommodation_id)
+        except Accommodation.DoesNotExist:
+            return Response({"detail": f"Accommodation with id {accommodation_id} does not exist."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            room = accommodation.types.get(id=room_id)  # Ensure the room is related to the accommodation
+        except RoomType.DoesNotExist:
+            return Response({"detail": f"Room with id {room_id} is not available for this accommodation."},
+                            status=status.HTTP_404_NOT_FOUND)
 
         # Calculation of the total amount
         total_price = room.price_per_night * number_of_days
@@ -89,6 +99,27 @@ class GuestServiceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     log_event = True
     activity_name = "Guest Service Management"
+
+    @action(detail=False, methods=['get'],
+            url_path='guestService/(?P<accommodation_id>[^/.]+)',
+            permission_classes=[AllowAny])
+    def get_guest_service_by_accommodation(self, request, accommodation_id=None):
+        """
+        Retrieve all guest services for a given accommodation by accommodation_id
+        """
+        if not accommodation_id:
+            return Response({'error': 'The accommodation_id parameter is required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        guest_services = self.get_guest_services_by_accommodation(accommodation_id)
+        serializer = self.get_serializer(guest_services, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def get_guest_services_by_accommodation(self, accommodation_id):
+        """
+        Helper method to get guest services by accommodation_id
+        """
+        return self.queryset.filter(accommodation_id=accommodation_id)
 
 
 @extend_schema(tags=['AM - Feedback Review'])

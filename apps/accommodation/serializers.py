@@ -42,8 +42,17 @@ class FeedbackReviewSerializer(serializers.ModelSerializer):
 
 
 class AccommodationCalculatePriceSerializer(serializers.Serializer):
+    accommodation_id = serializers.IntegerField(required=True)  # 新增 accommodation_id
     room_id = serializers.IntegerField(required=True)
     number_of_days = serializers.IntegerField(required=True)
+
+    def validate_accommodation_id(self, value):
+        """
+        Validate that the accommodation_id exists in the database.
+        """
+        if not Accommodation.objects.filter(id=value).exists():
+            raise serializers.ValidationError(f"Accommodation with id {value} does not exist.")
+        return value
 
     def validate_room_id(self, value):
         """
