@@ -35,20 +35,7 @@ class PublicRoomBookingAPITests(TestCase):
         )
         self.client.force_authenticate(self.user)
 
-        self.accommodation = Accommodation.objects.create(
-            name='Test Accommodation',
-            location='Test Location',
-            star_rating=4,
-            total_rooms=100,
-            amenities='Test amenities',
-            type='Test type',
-            check_in_time='09:00:00',
-            check_out_time='17:00:00',
-            contact_info='Test contact info'
-        )
-
         self.room = RoomType.objects.create(
-            accommodation_id=self.accommodation,
             room_type='Test Room Type',
             price_per_night=Decimal('100.00'),
             max_occupancy=20,
@@ -56,12 +43,23 @@ class PublicRoomBookingAPITests(TestCase):
         )
 
         self.room2 = RoomType.objects.create(
-            accommodation_id=self.accommodation,
             room_type='Test Room Type',
             price_per_night=Decimal('200.00'),
             max_occupancy=20,
             availability=True
         )
+
+        self.accommodation = Accommodation.objects.create(
+            name='Test Accommodation',
+            location='Test Location',
+            star_rating=4,
+            total_rooms=100,
+            amenities='Test amenities',
+            check_in_time='09:00:00',
+            check_out_time='17:00:00',
+            contact_info='Test contact info'
+        )
+        self.accommodation.types.set([self.room, self.room2])
 
     def test_retrieve_room_bookings(self):
         user2 = create_user(
@@ -146,12 +144,6 @@ class PublicRoomBookingAPITests(TestCase):
         }
 
         res = self.client.post(ROOM_BOOKING_URL, payload)
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-
-        # change user role to staff
-        self.user.is_staff = True
-        res = self.client.post(ROOM_BOOKING_URL, payload)
-
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data['total_price'], '200.00')
 
@@ -165,25 +157,24 @@ class PrivateRoomBookingAPITests(TestCase):
         )
         self.client.force_authenticate(self.user)
 
+        self.room = RoomType.objects.create(
+            room_type='Test Room Type',
+            price_per_night=Decimal('100.00'),
+            max_occupancy=20,
+            availability=True
+        )
+
         self.accommodation = Accommodation.objects.create(
             name='Test Accommodation',
             location='Test Location',
             star_rating=4,
             total_rooms=100,
             amenities='Test amenities',
-            type='Test type',
             check_in_time='09:00:00',
             check_out_time='17:00:00',
             contact_info='Test contact info'
         )
-
-        self.room = RoomType.objects.create(
-            accommodation_id=self.accommodation,
-            room_type='Test Room Type',
-            price_per_night=Decimal('100.00'),
-            max_occupancy=20,
-            availability=True
-        )
+        self.accommodation.types.set([self.room])
 
     def test_create_room_booking(self):
         payload = {
@@ -197,11 +188,6 @@ class PrivateRoomBookingAPITests(TestCase):
         }
 
         res = self.client.post(ROOM_BOOKING_URL, payload)
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-
-        # change user role to staff
-        self.user.is_staff = True
-        res = self.client.post(ROOM_BOOKING_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data['total_price'], '200.00')
@@ -212,10 +198,20 @@ class PrivateRoomBookingAPITests(TestCase):
             password='password123'
         )
 
-        room_booking = create_room_booking(
+        room_booking1 = create_room_booking(
             room_type_id=self.room,
             accommodation_id=self.accommodation,
             user_id=user2,
+            check_in_date='2021-03-01',
+            check_out_date='2021-03-03',
+            booking_status=False,
+            payment_status=False
+        )
+
+        room_booking2 = create_room_booking(
+            room_type_id=self.room,
+            accommodation_id=self.accommodation,
+            user_id=self.user,
             check_in_date='2021-03-01',
             check_out_date='2021-03-03',
             booking_status=False,
@@ -225,20 +221,19 @@ class PrivateRoomBookingAPITests(TestCase):
         payload = {
             'room_type_id': self.room.id,
             'accommodation_id': self.accommodation.id,
-            'user_id': user2.id,
+            'user_id': self.user.id,
             'check_in_date': '2021-03-01',
             'check_out_date': '2021-03-03',
             'booking_status': True,
             'payment_status': False
         }
 
-        res = self.client.patch(detail_url(room_booking.id), payload)
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        res = self.client.patch(detail_url(room_booking1.id), payload)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
-        # change user role to staff
-        self.user.is_staff = True
-        res = self.client.patch(detail_url(room_booking.id), payload)
+        res = self.client.patch(detail_url(room_booking2.id), payload)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
         self.assertEqual(res.data['booking_status'], True)
         self.assertEqual(res.data['payment_status'], False)
 
@@ -248,7 +243,7 @@ class PrivateRoomBookingAPITests(TestCase):
             password='password123'
         )
 
-        room_booking = create_room_booking(
+        room_booking1 = create_room_booking(
             room_type_id=self.room,
             accommodation_id=self.accommodation,
             user_id=user2,
@@ -258,11 +253,19 @@ class PrivateRoomBookingAPITests(TestCase):
             payment_status=False
         )
 
-        res = self.client.delete(detail_url(room_booking.id))
+        room_booking2 = create_room_booking(
+            room_type_id=self.room,
+            accommodation_id=self.accommodation,
+            user_id=self.user,
+            check_in_date='2021-03-01',
+            check_out_date='2021-03-03',
+            booking_status=False,
+            payment_status=False
+        )
 
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        res = self.client.delete(detail_url(room_booking1.id))
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
-        # change user role to staff
-        self.user.is_staff = True
-        res = self.client.delete(detail_url(room_booking.id))
+        res = self.client.delete(detail_url(room_booking2.id))
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(RoomBooking.objects.filter(id=room_booking2.id).exists())

@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from apps.accommodation.models import GuestService, Accommodation
+from apps.accommodation.models import GuestService, Accommodation, RoomType
 
 GUEST_SERVICE_API_URL = reverse('accommodation:guest-service-list')
 
@@ -26,17 +26,24 @@ def detail_url(guest_service_id):
 class PublicGuestServiceAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
+        self.room = RoomType.objects.create(
+            room_type='Test type',
+            price_per_night=100.00,
+            max_occupancy=20,
+            availability=True
+        )
+
         self.accommodation = Accommodation.objects.create(
             name='Test Accommodation',
             location='Test Location',
             star_rating=4,
             total_rooms=100,
             amenities='Test amenities',
-            type='Test type',
             check_in_time='09:00:00',
             check_out_time='17:00:00',
             contact_info='Test contact info'
         )
+        self.accommodation.types.set([self.room])
 
     def test_retrieve_guest_services(self):
         create_guest_service(
@@ -81,17 +88,24 @@ class PrivateGuestServiceAPITests(TestCase):
         self.user = create_user()
         self.client.force_authenticate(self.user)
 
+        self.room = RoomType.objects.create(
+            room_type='Test Room Type',
+            price_per_night=Decimal('100.00'),
+            max_occupancy=20,
+            availability=True
+        )
+
         self.accommodation = Accommodation.objects.create(
             name='Test Accommodation',
             location='Test Location',
             star_rating=4,
             total_rooms=100,
             amenities='Test amenities',
-            type='Test type',
             check_in_time='09:00:00',
             check_out_time='17:00:00',
             contact_info='Test contact info'
         )
+        self.accommodation.types.set([self.room])
 
     def test_create_guest_service(self):
         payload = {

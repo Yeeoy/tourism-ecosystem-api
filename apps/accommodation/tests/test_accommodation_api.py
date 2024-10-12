@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from apps.accommodation.models import Accommodation
+from apps.accommodation.models import Accommodation, RoomType
 
 ACCOMMODATION_URL = reverse('accommodation:accommodation-list')
 
@@ -27,31 +27,38 @@ def detail_url(accommodation_id):
 class PublicAccommodationAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
+        self.room = RoomType.objects.create(
+            room_type='Test type',
+            price_per_night=100.00,
+            max_occupancy=20,
+            availability=True
+        )
 
     def test_retrieve_accommodations(self):
-        create_accommodation(
+        accommodation1 = create_accommodation(
             name='Test Accommodation',
             location='Test Location',
             star_rating=4,
             total_rooms=100,
             amenities='Test amenities',
-            type='Test type',
             check_in_time='09:00:00',
             check_out_time='17:00:00',
             contact_info='Test contact info'
         )
 
-        create_accommodation(
+        accommodation2 = create_accommodation(
             name='Test Accommodation 2',
             location='Test Location 2',
             star_rating=3,
             total_rooms=200,
             amenities='Test amenities 2',
-            type='Test type 2',
             check_in_time='09:00:00',
             check_out_time='17:00:00',
             contact_info='Test contact info 2'
         )
+
+        accommodation1.types.set([self.room])
+        accommodation2.types.set([self.room])
 
         res = self.client.get(ACCOMMODATION_URL)
 
@@ -68,11 +75,11 @@ class PublicAccommodationAPITests(TestCase):
             star_rating=4,
             total_rooms=100,
             amenities='Test amenities',
-            type='Test type',
             check_in_time='09:00:00',
             check_out_time='17:00:00',
             contact_info='Test contact info'
         )
+        accommodation.types.set([self.room])
 
         res = self.client.get(detail_url(accommodation.id))
 
@@ -82,7 +89,7 @@ class PublicAccommodationAPITests(TestCase):
         self.assertEqual(res.data['star_rating'], accommodation.star_rating)
         self.assertEqual(res.data['total_rooms'], accommodation.total_rooms)
         self.assertEqual(res.data['amenities'], accommodation.amenities)
-        self.assertEqual(res.data['type'], accommodation.type)
+        self.assertEqual(res.data['types'][0], self.room.id)
         self.assertEqual(res.data['check_in_time'], accommodation.check_in_time)
         self.assertEqual(res.data['check_out_time'], accommodation.check_out_time)
         self.assertEqual(res.data['contact_info'], accommodation.contact_info)
@@ -96,15 +103,28 @@ class PrivateAccommodationAPITests(TestCase):
             password='password123'
         )
         self.client.force_authenticate(self.user)
+        self.room = RoomType.objects.create(
+            room_type='Test type',
+            price_per_night=100.00,
+            max_occupancy=20,
+            availability=True
+        )
 
     def test_create_accommodation(self):
+        self.room = RoomType.objects.create(
+            room_type='Test type',
+            price_per_night=100.00,
+            max_occupancy=20,
+            availability=True
+        )
+
         payload = {
             'name': 'Test Accommodation',
             'location': 'Test Location',
             'star_rating': 4,
             'total_rooms': 100,
             'amenities': 'Test amenities',
-            'type': 'Test type',
+            'types': [self.room.id],
             'check_in_time': '09:00:00',
             'check_out_time': '17:00:00',
             'contact_info': 'Test contact info'
@@ -128,11 +148,11 @@ class PrivateAccommodationAPITests(TestCase):
             star_rating=4,
             total_rooms=100,
             amenities='Test amenities',
-            type='Test type',
             check_in_time='09:00:00',
             check_out_time='17:00:00',
             contact_info='Test contact info'
         )
+        accommodation.types.set([self.room])
 
         payload = {
             'name': 'Updated Accommodation',
@@ -140,7 +160,6 @@ class PrivateAccommodationAPITests(TestCase):
             'star_rating': 5,
             'total_rooms': 200,
             'amenities': 'Updated amenities',
-            'type': 'Updated type',
             'check_in_time': '10:00:00',
             'check_out_time': '18:00:00',
             'contact_info': 'Updated contact info'
@@ -160,7 +179,6 @@ class PrivateAccommodationAPITests(TestCase):
         self.assertEqual(accommodation.star_rating, payload['star_rating'])
         self.assertEqual(accommodation.total_rooms, payload['total_rooms'])
         self.assertEqual(accommodation.amenities, payload['amenities'])
-        self.assertEqual(accommodation.type, payload['type'])
         # Convert accommodation.check_in_time to string
         self.assertEqual(accommodation.check_in_time.strftime('%H:%M:%S'), payload['check_in_time'])
         self.assertEqual(accommodation.check_out_time.strftime('%H:%M:%S'), payload['check_out_time'])
@@ -173,11 +191,11 @@ class PrivateAccommodationAPITests(TestCase):
             star_rating=4,
             total_rooms=100,
             amenities='Test amenities',
-            type='Test type',
             check_in_time='09:00:00',
             check_out_time='17:00:00',
             contact_info='Test contact info'
         )
+        accommodation.types.set([self.room])
 
         res = self.client.delete(detail_url(accommodation.id))
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
