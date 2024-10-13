@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.tourism_information_center.models import Destination, Tour, EventNotification
+from apps.tourism_information_center.models import Destination, Tour, EventNotification, TourBooking
 
 
 class DestinationSerializer(serializers.ModelSerializer):
@@ -13,6 +13,13 @@ class DestinationSerializer(serializers.ModelSerializer):
 class TourSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tour
+        fields = '__all__'
+        read_only_fields = ['id']
+
+
+class TourBookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TourBooking
         fields = '__all__'
         read_only_fields = ['id']
 
