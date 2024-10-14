@@ -7,6 +7,7 @@ class Restaurant(models.Model):
     cuisine_type = models.CharField(max_length=255)
     opening_hours = models.CharField(max_length=255)
     contact_info = models.CharField(max_length=255)
+    img_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -44,3 +45,28 @@ class OnlineOrder(models.Model):
 
     def __str__(self):
         return self.restaurant.name
+
+    # A method to calculate total amount from related OrderItems
+    def calculate_total_amount(self):
+        total = sum(item.subtotal() for item in self.order_items.all())
+        self.total_amount = total
+        self.save()
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey('OnlineOrder', related_name='order_items', on_delete=models.CASCADE)
+    menu_item = models.ForeignKey('Menu', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.quantity} x {self.menu_item.item_name} for {self.order}"
+
+    # Subtotal for each menu item
+    def subtotal(self):
+        return self.menu_item.price * self.quantity
+
+    def save(self, *args, **kwargs):
+        # Ensure the menu item belongs to the same restaurant as the order
+        if self.menu_item.restaurant != self.order.restaurant:
+            raise ValueError(f"The menu item '{self.menu_item}' does not belong to the restaurant of the order.")
+        super().save(*args, **kwargs)

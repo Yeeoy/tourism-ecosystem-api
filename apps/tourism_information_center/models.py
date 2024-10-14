@@ -9,6 +9,7 @@ class Destination(models.Model):
     location = models.CharField(max_length=255)
     opening_hours = models.CharField(max_length=255)
     contact_info = models.CharField(max_length=255)
+    img_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.name

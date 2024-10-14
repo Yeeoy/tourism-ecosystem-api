@@ -13,6 +13,7 @@ class Accommodation(models.Model):
     check_in_time = models.TimeField()
     check_out_time = models.TimeField()
     contact_info = models.CharField(max_length=255)
+    img_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.name
