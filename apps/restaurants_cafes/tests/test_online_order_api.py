@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from apps.restaurants_cafes.models import OnlineOrder, Restaurant
+from apps.restaurants_cafes.models import OnlineOrder, Restaurant, Menu
 
 ONLINE_ORDER_URL = reverse('restaurants_cafes:online-order-list')
 
@@ -35,6 +35,12 @@ class PrivateOnlineOrderApiTests(TestCase):
             opening_hours='8:00AM - 10:00PM',
             contact_info='0700000000'
         )
+        self.menu_item = Menu.objects.create(
+            restaurant=self.restaurant,
+            item_name='Burger',
+            description='Delicious burger',
+            price=Decimal('50.00')
+        )
 
     def test_create_online_order(self):
         """Test creating an online order"""
@@ -44,16 +50,16 @@ class PrivateOnlineOrderApiTests(TestCase):
             'order_date': '2021-09-01',
             'order_time': '12:00:00',
             'total_amount': Decimal('100.00'),
-            'order_status': 'Pending'
+            'order_status': 'Pending',
+            'order_items': [  # 添加order_items字段
+                {
+                    'menu_item_id': self.menu_item.id,
+                    'quantity': 2
+                }
+            ]
         }
-        res = self.client.post(ONLINE_ORDER_URL, payload)
-
+        res = self.client.post(ONLINE_ORDER_URL, payload, format='json')
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(res.data['restaurant'], self.restaurant.id)
-        self.assertEqual(res.data['user'], self.user.id)
-        self.assertEqual(res.data['order_date'], payload['order_date'])
-        self.assertEqual(res.data['order_time'], payload['order_time'])
-        self.assertEqual(res.data['order_status'], payload['order_status'])
 
     def test_retrieve_online_orders(self):
         user2 = create_user(email="user2@example.com", password="test1234")

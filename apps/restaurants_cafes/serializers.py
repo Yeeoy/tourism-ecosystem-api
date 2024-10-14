@@ -1,7 +1,5 @@
 from decimal import Decimal
-
 from rest_framework import serializers
-
 from apps.restaurants_cafes.models import Restaurant, TableReservation, Menu, OnlineOrder, OrderItem
 
 
@@ -31,6 +29,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     menu_item_id = serializers.PrimaryKeyRelatedField(
         queryset=Menu.objects.all(), source='menu_item', write_only=True
     )
+    subtotal = serializers.SerializerMethodField()  # 添加subtotal计算方法
 
     class Meta:
         model = OrderItem
@@ -38,7 +37,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'subtotal']
 
     def get_subtotal(self, obj):
-        return obj.subtotal()
+        return obj.subtotal()  # 调用模型中的subtotal方法
 
 
 class OnlineOrderSerializer(serializers.ModelSerializer):
@@ -59,19 +58,21 @@ class OnlineOrderSerializer(serializers.ModelSerializer):
             order_date=validated_data.get('order_date'),
             order_time=validated_data.get('order_time'),
             order_status=validated_data.get('order_status'),
-            total_amount=0  # 初始设置为0，稍后会更新
+            total_amount=Decimal(0)  # 初始设置为0，稍后会更新
         )
 
         # 计算总金额并创建订单项
         order_items = []
         total_amount = Decimal(0)
         for item_data in order_items_data:
+            menu_item = item_data['menu_item']
+            quantity = item_data['quantity']
             item = OrderItem(
                 order=order,
-                menu_item=item_data['menu_item'],
-                quantity=item_data['quantity']
+                menu_item=menu_item,
+                quantity=quantity
             )
-            total_amount += item.subtotal()  # 计算订单的总金额
+            total_amount += menu_item.price * quantity  # 直接计算小计
             order_items.append(item)
 
         # 批量创建订单项，减少数据库交互
@@ -95,10 +96,26 @@ class OnlineOrderSerializer(serializers.ModelSerializer):
             # 删除现有的订单项
             instance.order_items.all().delete()
             # 重新创建新的订单项
+            order_items = []
+            total_amount = Decimal(0)
             for item_data in order_items_data:
-                OrderItem.objects.create(order=instance, **item_data)
+                menu_item = item_data['menu_item']
+                quantity = item_data['quantity']
+                item = OrderItem(
+                    order=instance,
+                    menu_item=menu_item,
+                    quantity=quantity
+                )
+                total_amount += menu_item.price * quantity
+                order_items.append(item)
 
-        instance.calculate_total_amount()  # 重新计算总金额
+            # 批量创建订单项
+            OrderItem.objects.bulk_create(order_items)
+
+            # 更新订单的总金额
+            instance.total_amount = total_amount
+            instance.save()
+
         return instance
 
 

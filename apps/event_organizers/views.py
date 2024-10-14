@@ -4,7 +4,7 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import (IsAuthenticated, AllowAny)
+from rest_framework.permissions import (IsAuthenticated)
 from rest_framework.response import Response
 
 from tourism_ecosystem.permissions import IsAdminOrReadOnly
@@ -18,7 +18,7 @@ from .serializers import (EventSerializer, VenueBookingSerializer,
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [AllowAny]  # Only admin can access
+    permission_classes = [IsAdminOrReadOnly]
     log_event = True
     activity_name = "Event Management"
 
