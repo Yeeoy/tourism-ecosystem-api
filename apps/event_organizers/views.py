@@ -2,34 +2,33 @@ from decimal import Decimal
 
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated)
 from rest_framework.response import Response
 
 from tourism_ecosystem.permissions import IsAdminOrReadOnly
 from tourism_ecosystem.responses import CustomResponse
+from tourism_ecosystem.views import LoggingViewSet
 from .models import (Event, VenueBooking, EventPromotion)
 from .serializers import (EventSerializer, VenueBookingSerializer,
                           EventPromotionSerializer, EventBookingCalculatePriceSerializer)
 
 
 @extend_schema(tags=['EO - Event'])
-class EventViewSet(viewsets.ModelViewSet):
+class EventViewSet(LoggingViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsAdminOrReadOnly]
-    log_event = True
-    activity_name = "Event Management"
+    activity_name = "Event"
 
 
 @extend_schema(tags=['EO - Venue Booking'])
-class VenueBookingViewSet(viewsets.ModelViewSet):
+class VenueBookingViewSet(LoggingViewSet):
     queryset = VenueBooking.objects.all()
     serializer_class = VenueBookingSerializer
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access
-    log_event = True
-    activity_name = "Venue Booking Management"
+    permission_classes = [IsAuthenticated]
+    activity_name = "Venue Booking"
 
     def perform_create(self, serializer):
         # Automatically set the current logged-in user as user_id
@@ -54,6 +53,7 @@ class VenueBookingViewSet(viewsets.ModelViewSet):
         Calculate and return the total amount, only event and ticket count are required as parameters
         """
         # Use custom serializer for data validation
+        self.activity_name = "Calculate Event Price"
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -113,9 +113,8 @@ class VenueBookingViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=['EO - Event Promotion'])
-class EventPromotionViewSet(viewsets.ModelViewSet):
+class EventPromotionViewSet(LoggingViewSet):
     queryset = EventPromotion.objects.all()
     serializer_class = EventPromotionSerializer
-    permission_classes = [IsAdminOrReadOnly]  # Only admin can access
-    log_event = True
+    permission_classes = [IsAdminOrReadOnly]
     activity_name = "Event Promotion"

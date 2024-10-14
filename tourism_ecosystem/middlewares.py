@@ -1,9 +1,14 @@
+import logging
 import uuid
 
 from django.urls import resolve
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
+from rest_framework.viewsets import ViewSet, ModelViewSet
 
 from apps.customUser.models import EventLog
+
+logger = logging.getLogger(__name__)
 
 
 class RequestLoggingMiddleware:
@@ -11,91 +16,168 @@ class RequestLoggingMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        self.process_request(request)
-        response = self.get_response(request)
-        self.process_response(request, response)
-        return response
+        try:
+            self.process_request(request)
+            response = self.get_response(request)
+            self.process_response(request, response)
+            return response
+        except Exception as e:
+            logger.error(f"Unexpected error in RequestLoggingMiddleware: {str(e)}")
+            return self.get_response(request)
 
     def process_request(self, request):
-        # Generate a new case_id if it does not exist in the session
-        if not request.session.get('case_id'):
-            request.session['case_id'] = str(uuid.uuid4())
+        try:
+            user = self.get_user_from_token(request)
+            case_id = self.get_or_create_case_id(request, user)
+            request.session['case_id'] = case_id
 
-        # Record the request start time
-        request.start_time = timezone.now()
-        # Get the current user instance (set to None if not logged in)
-        user = request.user if request.user.is_authenticated else None
-        user_name = user.email if user else None  # Get the username or other fields from the custom User model
+            request.start_time = timezone.now()
+            user_name = getattr(user, 'email', 'Anonymous')
+            user_id = user.id if user else None
 
-        # Get the current request's View class and `action` name
-        view_class, action_name = self.get_view_class_and_action(request)
-        # print(f"Processing request: View Class = {view_class}, Action = {action_name}")
+            view_class, action_name = self.get_view_class_and_action(request)
+            logger.debug(f"View class: {view_class}, Action name: {action_name}")
 
-        if not self.should_log(view_class):
-            # print(f"Skipping logging for {view_class}")
-            return
+            if view_class:
+                if hasattr(view_class, 'get_activity_name'):
+                    activity = view_class.get_activity_name(action_name)
+                elif hasattr(view_class, 'activity_name'):
+                    activity = f"{view_class.activity_name} {action_name.capitalize()}"
+                else:
+                    activity = f"{view_class.__name__.replace('ViewSet', '')} {action_name.capitalize()}"
+            else:
+                activity = f"Unknown Activity {action_name.capitalize()}"
 
-        # Use the custom `activity_name` or `action_name` as the activity name
-        activity = getattr(view_class, 'activity_name', action_name)
+            logger.debug(f"Generated activity name: {activity}")
 
-        # Create a log record, only recording `start_time`, `end_time` is empty
-        request.event_log = EventLog.objects.create(
-            case_id=request.session['case_id'],
-            activity=activity,
-            start_time=request.start_time,
-            user=user,  # Directly record the user instance
-            user_name=user_name  # Record the user's name
-        )
-        print(f"[Event Log Created] {request.event_log}")
+            request.event_log = EventLog.objects.create(
+                case_id=case_id,
+                activity=activity,
+                start_time=request.start_time,
+                user_id=user_id,
+                user_name=user_name
+            )
+            logger.info(f"[Event Log Created] {request.event_log}")
+            logger.debug(f"Event Log ID: {request.event_log.id}, Start Time: {request.event_log.start_time}")
+        except Exception as e:
+            logger.error(f"Error in process_request: {str(e)}")
+
+    def get_user_from_token(self, request):
+        """
+        从请求中的Token获取用户
+        """
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        if auth_header.startswith('Token '):
+            token_key = auth_header.split(' ')[1]
+            try:
+                token = Token.objects.get(key=token_key)
+                return token.user
+            except Token.DoesNotExist:
+                pass
+        return None
 
     def process_response(self, request, response):
-        # Get the request end time
-        end_time = timezone.now()
-
-        # Ensure `event_log` was created in `process_request`
-        if not hasattr(request, 'event_log'):
-            return response
-
-        # Update the `event_log` record, filling in the `end_time` field and `status_code`
         try:
-            request.event_log.end_time = end_time
-            request.event_log.status_code = response.status_code
-            request.event_log.save()
-            print(f"[Event Log Updated] {request.event_log}")
-        except Exception as e:
-            print(f"Error updating log in process_response: {e}")
+            if hasattr(request, 'event_log'):
+                end_time = timezone.now()
+                request.event_log.end_time = end_time
+                request.event_log.status_code = response.status_code
+                request.event_log.save()
+                logger.info(f"[Event Log Updated] {request.event_log}")
 
-        return response
+                if self.is_process_completed(request, response):
+                    request.session.pop('case_id', None)
+            else:
+                logger.warning("No event_log found on request object")
+        except Exception as e:
+            logger.error(f"Error in process_response: {str(e)}")
+        finally:
+            return response
 
     def get_view_class_and_action(self, request):
         """
-        Get the View class and action name corresponding to the current request (e.g., the basename of a ViewSet).
+        解析请求中的视图类和动作。
         """
         try:
             resolver_match = resolve(request.path_info)
             view_func = resolver_match.func
+            view_class = None
+            action_name = None
 
-            # Check if `view_func` is a class-based view of `viewsets` or `APIView`
             if hasattr(view_func, 'view_class'):
                 view_class = view_func.view_class
-                action_name = resolver_match.view_name.split('-')[-1]
-            else:
-                view_class = resolver_match.func.cls if hasattr(resolver_match.func, 'cls') else view_func
-                action_name = view_class.__name__ if hasattr(view_class, '__name__') else str(view_class)
+                view_instance = view_class()
 
-            # Debug information: output the resolution result
-            # print(f"Resolved View Class: {view_class}, Action Name: {action_name}")
+                # 尝试确定action
+                if hasattr(view_instance, 'action_map'):
+                    action_name = view_instance.action_map.get(request.method.lower())
+
+                if not action_name and (issubclass(view_class, ViewSet) or issubclass(view_class, ModelViewSet)):
+                    # 对于ViewSet和ModelViewSet，我们可以根据HTTP方法和URL模式推断action
+                    if 'pk' in resolver_match.kwargs:
+                        action_map = {
+                            'get': 'retrieve',
+                            'put': 'update',
+                            'patch': 'partial_update',
+                            'delete': 'destroy'
+                        }
+                    else:
+                        action_map = {
+                            'get': 'list',
+                            'post': 'create'
+                        }
+                    action_name = action_map.get(request.method.lower())
+
+                if not action_name:
+                    action_name = resolver_match.url_name.split('-')[-1]
+            elif hasattr(view_func, '__name__'):
+                view_class = view_func
+                action_name = view_func.__name__
+
+            if not action_name:
+                action_name = request.method.lower()
+
             return view_class, action_name
         except Exception as e:
-            print(f"Error resolving view class and action: {e}")
-            return None, None
+            logger.error(f"Error resolving view class and action: {str(e)}")
+            return None, 'unknown'
 
     def should_log(self, view_class):
         """
-        Check if the current View class needs to log events.
+        Determines whether the view class should log an event.
         """
         if view_class is None:
             return False
-        should_log = getattr(view_class, 'log_event', False)
-        # print(f"Should log for {view_class}: {should_log}")
-        return should_log
+        return getattr(view_class, 'log_event', False)
+
+    def get_or_create_case_id(self, request, user):
+        """
+        生成或获取用于日志记录的case ID。
+        """
+        try:
+            if user:
+                return f"user_{user.id}"
+            else:
+                session_key = request.session.session_key
+                if not session_key:
+                    request.session.create()
+                    session_key = request.session.session_key
+                return f"session_{session_key}"
+        except Exception as e:
+            logger.error(f"Error in get_or_create_case_id: {str(e)}")
+            return f"error_{uuid.uuid4().hex}"
+
+    def is_process_completed(self, request, response):
+        """
+        Determines if the process is completed based on response.
+        """
+        try:
+            view_class, action_name = self.get_view_class_and_action(request)
+            if action_name == 'logout':
+                return True
+            if response.status_code >= 400:
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error in is_process_completed: {str(e)}")
+            return False

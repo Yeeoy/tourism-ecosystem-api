@@ -1,48 +1,44 @@
 # Create your views here.
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from apps.tourism_information_center.models import Destination, Tour, EventNotification, TourBooking
 from apps.tourism_information_center.serializers import DestinationSerializer, TourSerializer, \
     EventNotificationSerializer, TourBookingSerializer
 from tourism_ecosystem.permissions import IsAdminOrReadOnly
+from tourism_ecosystem.views import LoggingViewSet
 
 
 @extend_schema(tags=['TIC - Destination'])
-class DestinationViewSet(viewsets.ModelViewSet):
+class DestinationViewSet(LoggingViewSet):
     queryset = Destination.objects.all()
     serializer_class = DestinationSerializer
     permission_classes = [IsAdminOrReadOnly]
-    log_event = True
-    activity_name = "Destination Management"
+    activity_name = "Destination"  # 确保这里设置了正确的activity_name
 
 
 @extend_schema(tags=['TIC - Tour'])
-class TourViewSet(viewsets.ModelViewSet):
+class TourViewSet(LoggingViewSet):
     queryset = Tour.objects.all()
     serializer_class = TourSerializer
     permission_classes = [IsAdminOrReadOnly]
-    log_event = True
-    activity_name = "Tour Management"
+    activity_name = "Tour"
 
 
 @extend_schema(tags=['TIC - Event Notification'])
-class EventNotificationViewSet(viewsets.ModelViewSet):
+class EventNotificationViewSet(LoggingViewSet):
     queryset = EventNotification.objects.all()
     serializer_class = EventNotificationSerializer
     permission_classes = [IsAdminOrReadOnly]
-    log_event = True
-    activity_name = "Event Notification Management"
+    activity_name = "Event Notification"
 
 
 @extend_schema(tags=['TIC - Tour Booking'])
-class TourBookingViewSet(viewsets.ModelViewSet):
+class TourBookingViewSet(LoggingViewSet):
     queryset = TourBooking.objects.all()
     serializer_class = TourBookingSerializer
     permission_classes = [IsAuthenticated]
-    log_event = True
-    activity_name = "Tour Booking Management"
+    activity_name = "Tour Booking"
 
     def perform_create(self, serializer):
         # Automatically set the current logged-in user as user_id

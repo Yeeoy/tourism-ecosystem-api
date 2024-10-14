@@ -2,6 +2,8 @@ from django.contrib.auth import (get_user_model, authenticate)
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
+from apps.customUser.models import EventLog
+
 
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -60,3 +62,9 @@ class AuthTokenSerializer(serializers.Serializer):
 
         attrs['user'] = user  # Add user to validated data
         return attrs  # Return validated data
+
+
+class EventLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventLog
+        fields = ['case_id', 'activity', 'start_time', 'end_time', 'user_id', 'user', 'user_name']

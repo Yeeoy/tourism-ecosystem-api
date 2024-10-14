@@ -1,5 +1,5 @@
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -8,43 +8,39 @@ from apps.accommodation.models import Accommodation, RoomType, RoomBooking, Gues
 from apps.accommodation.serializers import AccommodationSerializer, RoomTypeSerializer, \
     RoomBookingSerializer, AccommodationCalculatePriceSerializer, GuestServiceSerializer, FeedbackReviewSerializer
 from tourism_ecosystem.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
+from tourism_ecosystem.views import LoggingViewSet
 
 
 @extend_schema(tags=['AM - Accommodation'])
-class AccommodationViewSet(viewsets.ModelViewSet):
+class AccommodationViewSet(LoggingViewSet):
     queryset = Accommodation.objects.all()
     serializer_class = AccommodationSerializer
     permission_classes = [IsAdminOrReadOnly]
-    log_event = True
-    activity_name = "Accommodation Management"
+    activity_name = "Accommodation"  # 确保这里设置了正确的activity_name
 
 
 @extend_schema(tags=['AM - Room Type'])
-class RoomTypeViewSet(viewsets.ModelViewSet):
+class RoomTypeViewSet(LoggingViewSet):
     queryset = RoomType.objects.all()
     serializer_class = RoomTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
-    log_event = True
-    activity_name = "Room Type Management"
+    activity_name = "Room Type"
 
 
 @extend_schema(tags=['AM - Room Booking'])
-class RoomBookingViewSet(viewsets.ModelViewSet):
+class RoomBookingViewSet(LoggingViewSet):
     queryset = RoomBooking.objects.all()
     serializer_class = RoomBookingSerializer
     permission_classes = [IsAuthenticated]
-    log_event = True
+    activity_name = "Room Booking"
 
     def perform_create(self, serializer):
-        # Automatically sets the currently logged in user to user_id
         serializer.save(user_id=self.request.user)
 
     def get_queryset(self):
         user = self.request.user
-        # If admin user, return all orders
         if user.is_staff or user.is_superuser:
             return RoomBooking.objects.all()
-        # In case of a regular user, only orders related to the current user are returned
         return RoomBooking.objects.filter(user_id=user)
 
     @action(detail=False,
@@ -56,6 +52,7 @@ class RoomBookingViewSet(viewsets.ModelViewSet):
         """
         Calculates and returns the total amount using accommodation_id and room_id as parameters.
         """
+        self.activity_name = "Calculate Room Price"
         # Data validation using custom serializers
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -93,12 +90,11 @@ class RoomBookingViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=['AM - Guest Service'])
-class GuestServiceViewSet(viewsets.ModelViewSet):
+class GuestServiceViewSet(LoggingViewSet):
     queryset = GuestService.objects.all()
     serializer_class = GuestServiceSerializer
     permission_classes = [IsAdminOrReadOnly]
-    log_event = True
-    activity_name = "Guest Service Management"
+    activity_name = "Guest Service"
 
     @action(detail=False, methods=['get'],
             url_path='guestService/(?P<accommodation_id>[^/.]+)',
@@ -123,15 +119,13 @@ class GuestServiceViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=['AM - Feedback Review'])
-class FeedbackReviewViewSet(viewsets.ModelViewSet):
+class FeedbackReviewViewSet(LoggingViewSet):
     queryset = FeedbackReview.objects.all()
     serializer_class = FeedbackReviewSerializer
     permission_classes = [IsOwnerOrAdmin]
-    log_event = True
     activity_name = "Feedback Review"
 
     def perform_create(self, serializer):
-        # Automatically sets the current login user to user
         serializer.save(user=self.request.user)
 
     @action(detail=False, methods=['get'],

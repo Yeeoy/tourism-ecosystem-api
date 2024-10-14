@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -11,25 +11,24 @@ from apps.restaurants_cafes.serializers import (
     RestaurantSerializer, OnlineOrderSerializer, MenuSerializer,
     TableReservationSerializer, CalculateOrderSerializer
 )
-from tourism_ecosystem.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
+from tourism_ecosystem.permissions import IsAdminOrReadOnly
+from tourism_ecosystem.views import LoggingViewSet
 
 
 @extend_schema(tags=['RC - Restaurant'])
-class RestaurantViewSet(viewsets.ModelViewSet):
+class RestaurantViewSet(LoggingViewSet):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
     permission_classes = [IsAdminOrReadOnly]
-    log_event = True
-    activity_name = "Restaurant Management"
+    activity_name = "Restaurant"
 
 
 @extend_schema(tags=['RC - TableReservation'])
-class TableReservationViewSet(viewsets.ModelViewSet):
+class TableReservationViewSet(LoggingViewSet):
     queryset = TableReservation.objects.all()
     serializer_class = TableReservationSerializer
-    permission_classes = [IsOwnerOrAdmin]
-    log_event = True
-    activity_name = "Table Reservation Management"
+    permission_classes = [IsAuthenticated]
+    activity_name = "Table Reservation"
 
     def get_queryset(self):
         user = self.request.user
@@ -39,12 +38,11 @@ class TableReservationViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=['RC - Menu'])
-class MenuViewSet(viewsets.ModelViewSet):
+class MenuViewSet(LoggingViewSet):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
     permission_classes = [IsAdminOrReadOnly]
-    log_event = True
-    activity_name = "Menu Management"
+    activity_name = "Menu"
 
     @action(detail=False, methods=['get'],
             url_path='get_menu_by_restaurant/(?P<restaurant_id>[^/.]+)',
@@ -70,12 +68,11 @@ class MenuViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=['RC - OnlineOrder'])
-class OnlineOrderViewSet(viewsets.ModelViewSet):
+class OnlineOrderViewSet(LoggingViewSet):
     queryset = OnlineOrder.objects.all()
     serializer_class = OnlineOrderSerializer
     permission_classes = [IsAuthenticated]
-    log_event = True
-    activity_name = "Online Order Management"
+    activity_name = "Online Order"
 
     def get_queryset(self):
         user = self.request.user
@@ -89,6 +86,7 @@ class OnlineOrderViewSet(viewsets.ModelViewSet):
         """
         Calculate and return the total price based on selected menu items and their quantities.
         """
+        self.activity_name = "Calculate Order Price"
         # Use custom serializer for data validation
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
