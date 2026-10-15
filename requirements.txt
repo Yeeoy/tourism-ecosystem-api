@@ -1,6 +1,6 @@
 jsonschema<4.16.0
-Django==5.1
-djangorestframework==3.15.2
+Django==5.1.15
+djangorestframework==3.18.3
 django-cors-headers==4.4.0
 drf_spectacular==0.27.0
 PyMySQL==1.1.1
